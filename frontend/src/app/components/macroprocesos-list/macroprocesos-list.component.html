@@ -1,0 +1,162 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">
+            <i class="bi bi-diagram-3"></i> Gestión de Macroprocesos
+          </h4>
+          <button class="btn btn-light btn-sm" (click)="nuevoMacroproceso()">
+            <i class="bi bi-plus-circle"></i> Nuevo Macroproceso
+          </button>
+        </div>
+
+        <div class="card-body">
+          <!-- Formulario de Creación/Edición -->
+          <div *ngIf="mostrarFormulario" class="mb-4">
+            <div class="card border-primary">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">
+                  {{ modoEdicion ? 'Editar' : 'Nuevo' }} Macroproceso
+                </h5>
+              </div>
+              <div class="card-body">
+                <form (ngSubmit)="guardar()">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Tipo de Macroproceso *</label>
+                      <select class="form-select" [(ngModel)]="formulario.tipo" name="tipo" required>
+                        <option *ngFor="let tipo of tiposMacroproceso" [value]="tipo">
+                          {{ tipo }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Unidad Estratégica *</label>
+                      <input type="text" class="form-control" [(ngModel)]="formulario.unidadEstrategica" 
+                             name="unidadEstrategica" required placeholder="Ej: VDC, UTIC, VAD">
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-12 mb-3">
+                      <label class="form-label">Nombre del Macroproceso *</label>
+                      <input type="text" class="form-control" [(ngModel)]="formulario.nombre" 
+                             name="nombre" required placeholder="Ingrese el nombre del macroproceso">
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-12 mb-3">
+                      <label class="form-label">Descripción</label>
+                      <textarea class="form-control" rows="3" [(ngModel)]="formulario.descripcion" 
+                                name="descripcion" placeholder="Describa el macroproceso"></textarea>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Responsable Principal *</label>
+                      <input type="text" class="form-control" [(ngModel)]="formulario.responsablePrincipal" 
+                             name="responsablePrincipal" required placeholder="Nombre del responsable">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Estado de Documentación</label>
+                      <select class="form-select" [(ngModel)]="formulario.estadoDocumentacion" 
+                              name="estadoDocumentacion">
+                        <option *ngFor="let estado of estadosDocumentacion" [value]="estado">
+                          {{ getEstadoNombre(estado) }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-12 mb-3">
+                      <label class="form-label">Objetivos Estratégicos</label>
+                      <textarea class="form-control" rows="2" [(ngModel)]="formulario.objetivosEstrategicos" 
+                                name="objetivosEstrategicos" 
+                                placeholder="Describa los objetivos estratégicos"></textarea>
+                    </div>
+                  </div>
+
+                  <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary" (click)="cancelar()">
+                      <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                      <i class="bi bi-save"></i> {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabla de Macroprocesos -->
+          <div class="table-responsive">
+            <table class="table table-hover table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th>Código</th>
+                  <th>Tipo</th>
+                  <th>Nombre</th>
+                  <th>Unidad Estratégica</th>
+                  <th>Responsable</th>
+                  <th>Estado</th>
+                  <th>Avance</th>
+                  <th>Procesos</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let mp of macroprocesos">
+                  <td><strong>{{ mp.codigo }}</strong></td>
+                  <td><span class="badge bg-info">{{ mp.tipo }}</span></td>
+                  <td>{{ mp.nombre }}</td>
+                  <td>{{ mp.unidadEstrategica }}</td>
+                  <td>{{ mp.responsablePrincipal }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="getEstadoClass(mp.estadoDocumentacion)">
+                      {{ getEstadoNombre(mp.estadoDocumentacion) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="progress" style="height: 25px;">
+                      <div class="progress-bar" [style.width.%]="mp.porcentajeAvance" 
+                           role="progressbar" [attr.aria-valuenow]="mp.porcentajeAvance" 
+                           aria-valuemin="0" aria-valuemax="100">
+                        {{ mp.porcentajeAvance }}%
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge bg-secondary">{{ mp.cantidadProcesos || 0 }}</span>
+                  </td>
+                  <td class="text-center">
+                    <div class="btn-group btn-group-sm" role="group">
+                      <button class="btn btn-outline-primary" (click)="editarMacroproceso(mp)" 
+                              title="Editar">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button class="btn btn-outline-danger" (click)="eliminar(mp)" 
+                              title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="macroprocesos.length === 0">
+                  <td colspan="9" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                    <p class="mt-2">No hay macroprocesos registrados</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

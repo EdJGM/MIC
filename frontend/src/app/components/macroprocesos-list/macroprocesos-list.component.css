@@ -1,0 +1,24 @@
+/* Estilos específicos para el componente de macroprocesos */
+
+.progress {
+  font-weight: 600;
+}
+
+.btn-group {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.table thead th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.badge {
+  font-weight: 500;
+}
