@@ -22,3 +22,39 @@
 .badge {
   font-weight: 500;
 }
+
+/* Estilos del Modal */
+.modal.show {
+  display: block !important;
+  opacity: 1;
+}
+
+.modal-backdrop.show {
+  opacity: 0.5;
+}
+
+.modal-dialog {
+  max-width: 800px;
+}
+
+.modal-header {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-footer {
+  border-top: 1px solid #dee2e6;
+}
+
+.btn-close-white {
+  filter: brightness(0) invert(1);
+}
+
+.modal-content {
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
