@@ -43,7 +43,7 @@ export interface Proceso {
   codigo: string;
   nombre: string;
   descripcion: string;
-  objetivos: string;
+  responsable: string;
   macroprocesoId: number;
   macroprocesoNombre?: string;
   estadoDocumentacion: EstadoDocumentacion;
@@ -85,7 +85,7 @@ export interface ProcesoRequest {
   macroprocesoId: number;
   nombre: string;
   descripcion: string;
-  objetivos: string;
+  responsable?: string;
   estadoDocumentacion?: EstadoDocumentacion;
 }
 

@@ -151,7 +151,7 @@ export class ProcesosListComponent implements OnInit {
       macroprocesoId: proceso.macroprocesoId,
       nombre: proceso.nombre,
       descripcion: proceso.descripcion,
-      objetivos: proceso.objetivos,
+      responsable: proceso.responsable,
       estadoDocumentacion: proceso.estadoDocumentacion
     };
   }
@@ -242,7 +242,7 @@ export class ProcesosListComponent implements OnInit {
       macroprocesoId: 0,
       nombre: '',
       descripcion: '',
-      objetivos: '',
+      responsable: '',
       estadoDocumentacion: EstadoDocumentacion.NO_DOCUMENTADO
     };
   }

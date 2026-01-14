@@ -9,9 +9,9 @@
         </ng-template>
 
         <!-- Filtros -->
-        <div class="grid mb-3">
+        <div class="grid">
           <div class="col-12 md:col-8">
-            <div class="p-inputgroup">
+            <div class="p-inputgroup gap-2">
               <span class="p-inputgroup-addon">
                 <i class="pi pi-filter"></i>
               </span>
@@ -22,9 +22,9 @@
                 </option>
               </select>
               <button pButton type="button" icon="pi pi-search" label="Filtrar"
-                      class="p-button-primary" (click)="aplicarFiltro()"></button>
+                      class="p-button-primary p-3" (click)="aplicarFiltro()"></button>
               <button pButton type="button" icon="pi pi-times" label="Limpiar"
-                      class="p-button-secondary" (click)="limpiarFiltro()"></button>
+                      class="p-button-secondary p-3" (click)="limpiarFiltro()"></button>
             </div>
           </div>
         </div>
@@ -32,11 +32,11 @@
         <!-- Formulario Desglosable (Inline Expandible) -->
         <div *ngIf="mostrarFormulario" class="mb-4">
           <p-card [header]="modoEdicion ? 'Editar Proceso' : 'Nuevo Proceso'"
-                  styleClass="p-card-form">
+                  styleClass="p-card-form p-4">
             <form (ngSubmit)="guardar()" #formProceso="ngForm">
               <div class="grid">
                 <div class="col-12">
-                  <label for="macroprocesoId" class="block font-medium mb-2">Macroproceso Padre *</label>
+                  <label for="macroprocesoId" class="block font-medium mb-2">Macroproceso *</label>
                   <select class="p-inputtext w-full" [(ngModel)]="formulario.macroprocesoId"
                           name="macroprocesoId" required>
                     <option [ngValue]="0">Seleccione un macroproceso</option>
@@ -66,10 +66,9 @@
 
               <div class="grid mt-3">
                 <div class="col-12">
-                  <label for="objetivos" class="block font-medium mb-2">Objetivos del Proceso</label>
-                  <textarea pInputTextarea id="objetivos" [(ngModel)]="formulario.objetivos"
-                            name="objetivos" rows="2" class="w-full"
-                            placeholder="Describa los objetivos del proceso"></textarea>
+                  <label for="responsable" class="block font-medium mb-2">Responsable:</label>
+                  <textarea pInputTextarea id="responsable" [(ngModel)]="formulario.responsable" name="responsable" rows="2"
+                    class="w-full" placeholder="Describa el proceso"></textarea>
                 </div>
               </div>
 
@@ -87,9 +86,9 @@
 
               <div class="flex justify-content-end gap-2 mt-4">
                 <button pButton type="button" label="Cancelar" icon="pi pi-times"
-                        class="p-button-secondary" (click)="cancelar()"></button>
+                        class="p-button-danger p-3" (click)="cancelar()"></button>
                 <button pButton type="submit" [label]="modoEdicion ? 'Actualizar' : 'Guardar'"
-                        icon="pi pi-save" class="p-button-success"
+                        icon="pi pi-save" class="p-button-success p-3"
                         [disabled]="!formProceso.valid"></button>
               </div>
             </form>

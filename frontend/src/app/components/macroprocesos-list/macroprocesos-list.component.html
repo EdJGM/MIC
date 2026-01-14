@@ -11,7 +11,7 @@
         <!-- Formulario Desglosable (Inline Expandible) -->
         <div *ngIf="mostrarFormulario" class="mb-4">
           <p-card [header]="modoEdicion ? 'Editar Macroproceso' : 'Nuevo Macroproceso'"
-                  styleClass="p-card-form">
+                  styleClass="p-card-form p-4">
             <form (ngSubmit)="guardar()" #formMacroproceso="ngForm">
               <div class="grid">
                 <div class="col-12 md:col-6">
@@ -74,9 +74,9 @@
 
               <div class="flex justify-content-end gap-2 mt-4">
                 <button pButton type="button" label="Cancelar" icon="pi pi-times"
-                        class="p-button-secondary" (click)="cancelar()"></button>
+                        class="p-button-danger p-3" (click)="cancelar()"></button>
                 <button pButton type="submit" [label]="modoEdicion ? 'Actualizar' : 'Guardar'"
-                        icon="pi pi-save" class="p-button-success"
+                        icon="pi pi-save" class="p-button-success p-3"
                         [disabled]="!formMacroproceso.valid"></button>
               </div>
             </form>

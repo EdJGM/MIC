@@ -38,7 +38,7 @@
 
           <div class="col-12 md:col-2 flex align-items-end gap-2">
             <button pButton type="button" icon="pi pi-search" label="Filtrar"
-                    class="p-button-primary w-full" (click)="aplicarFiltro()"></button>
+                    class="p-button-primary w-full p-3" (click)="aplicarFiltro()"></button>
           </div>
         </div>
 
@@ -50,7 +50,7 @@
         <!-- Formulario Desglosable (Inline Expandible) -->
         <div *ngIf="mostrarFormulario" class="mb-4">
           <p-card [header]="modoEdicion ? 'Editar Subproceso' : 'Nuevo Subproceso'"
-                  styleClass="p-card-form">
+                  styleClass="p-card-form p-4">
             <form (ngSubmit)="guardar()" #formSubproceso="ngForm">
               <div class="grid">
                 <div class="col-12 md:col-6">
@@ -108,9 +108,9 @@
 
               <div class="flex justify-content-end gap-2 mt-4">
                 <button pButton type="button" label="Cancelar" icon="pi pi-times"
-                        class="p-button-secondary" (click)="cancelar()"></button>
+                        class="p-button-danger p-3" (click)="cancelar()"></button>
                 <button pButton type="submit" [label]="modoEdicion ? 'Actualizar' : 'Guardar'"
-                        icon="pi pi-save" class="p-button-warning"
+                        icon="pi pi-save" class="p-button-warning p-3"
                         [disabled]="!formSubproceso.valid"></button>
               </div>
             </form>
