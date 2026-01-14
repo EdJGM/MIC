@@ -1,1 +1,89 @@
-http://localhost:4200/
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="assets/espe-logo.png" alt="ESPE Logo" class="logo-small" onerror="this.style.display='none'">
+      <h4 class="sidebar-title">
+        <i class="bi bi-diagram-3-fill"></i>
+        Sistema de Gestión Integrado
+      </h4>
+      <p class="sidebar-subtitle">SGI-ESPE</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title accordion-header" (click)="toggleInventarioProcesos()">
+          <span>INVENTARIO DE PROCESOS</span>
+          <i class="bi" [ngClass]="inventarioProcesosOpen ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+        </div>
+
+        <div class="accordion-content" [class.open]="inventarioProcesosOpen">
+          <a class="nav-item submenu-item" routerLink="/macroprocesos" routerLinkActive="active">
+            <i class="bi bi-diagram-3"></i>
+            <span>Macroprocesos</span>
+          </a>
+
+          <a class="nav-item submenu-item" routerLink="/procesos" routerLinkActive="active">
+            <i class="bi bi-diagram-2"></i>
+            <span>Procesos</span>
+          </a>
+
+          <a class="nav-item submenu-item" routerLink="/subprocesos" routerLinkActive="active">
+            <i class="bi bi-diagram-2"></i>
+            <span>Subprocesos</span>
+          </a>
+        </div>
+      </div>
+      <!-- tambien hacer expacion para la lista infomada documentada de -->
+
+     <!-- <div class="nav-section">
+
+        <h6 class="nav-section-title">LISTA INFORMACION DOCUMENTADA</h6>
+      </div> -->
+      <div class="nav-section">
+        <div class="nav-section-title accordion-header" (click)="toggleListaInformacionDocumentada()">
+          <span>LISTA INFORMACION DOCUMENTADA</span>
+          <i class="bi" [ngClass]="listaInformacionDocumentadaOpen ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+      </div>
+      </div>
+   </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <button class="menu-toggle" (click)="toggleSidebar()">
+          <i class="bi bi-list"></i>
+        </button>
+      </div>
+      <div class="header-right">
+        <span class="user-name">CACHIGUANGO, DENILSON</span>
+        <div class="user-avatar">
+          <i class="bi bi-person-circle"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+
+    <footer class="main-footer">
+      <div class="footer-content">
+        <div class="footer-left">
+          <img src="assets/espe-logo.png" alt="ESPE" class="footer-logo" onerror="this.style.display='none'">
+          <div class="footer-text">
+            <p class="mb-0"><strong>Universidad de las Fuerzas Armadas ESPE</strong> 2025</p>
+            <small>© Todos los derechos reservados.</small>
+          </div>
+        </div>
+        <div class="footer-right">
+          <small>Versión: 1.0.1</small>
+        </div>
+      </div>
+    </footer>
+  </main>
+</div>

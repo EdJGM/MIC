@@ -429,23 +429,590 @@ body {
 }
 
 /* ===================================
-   RESPONSIVE
+   RESPONSIVE - TODOS LOS DISPOSITIVOS
    =================================== */
 
-@media (max-width: 768px) {
+/* Laptops grandes y desktops (1367px+) - Sin cambios, diseño por defecto */
+
+/* Laptops estándar (1024px - 1366px) */
+@media (min-width: 1024px) and (max-width: 1366px) {
   .page-header {
     padding: var(--spacing-lg);
   }
 
   .page-header-title h1 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
 
   .card-body {
     padding: var(--spacing-md);
   }
 
+  .p-panel .p-panel-content {
+    padding: 1.25rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .form-control,
+  .form-select,
+  .p-inputtext {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Tablets landscape (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .page-header {
+    padding: var(--spacing-md);
+    margin: calc(var(--spacing-lg) * -1);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .page-header-title h1 {
+    font-size: 1.5rem;
+  }
+
+  .page-header-title i {
+    font-size: 2rem;
+  }
+
+  .card-body {
+    padding: var(--spacing-md);
+  }
+
+  .p-panel .p-panel-content {
+    padding: 1rem;
+  }
+
+  .p-datatable .p-datatable-thead > tr > th {
+    font-size: 0.8rem;
+    padding: 0.625rem 0.75rem;
+  }
+
+  .p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .p-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .form-control,
+  .form-select,
+  .p-inputtext {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .stats-card {
+    padding: var(--spacing-md);
+  }
+
+  .stats-card h3 {
+    font-size: 1.75rem;
+  }
+}
+
+/* Tablets portrait y móviles grandes (577px - 767px) */
+@media (min-width: 577px) and (max-width: 767px) {
+  .page-header {
+    padding: var(--spacing-md);
+    margin: calc(var(--spacing-md) * -1);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .page-header-title h1 {
+    font-size: 1.25rem;
+  }
+
+  .page-header-title i {
+    font-size: 1.75rem;
+  }
+
+  .page-header-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .card {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .card-body {
+    padding: var(--spacing-md);
+  }
+
+  .p-panel .p-panel-header {
+    padding: 0.875rem 1rem;
+  }
+
+  .p-panel .p-panel-title {
+    font-size: 1rem;
+  }
+
+  .p-panel .p-panel-content {
+    padding: 1rem;
+  }
+
+  .p-datatable .p-datatable-thead > tr > th {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.625rem;
+  }
+
+  .p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.5rem 0.625rem;
+    font-size: 0.8rem;
+  }
+
+  .btn {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.85rem;
+  }
+
+  .p-button {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.85rem;
+  }
+
+  .p-button-rounded {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .form-control,
+  .form-select,
+  .p-inputtext {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .form-label {
+    font-size: 0.875rem;
+  }
+
+  .badge {
+    font-size: 0.8rem;
+    padding: 0.4em 0.65em;
+  }
+
+  .p-tag {
+    font-size: 0.8rem;
+    padding: 0.375rem 0.625rem;
+  }
+
+  .stats-card {
+    padding: var(--spacing-md);
+  }
+
+  .stats-card h3 {
+    font-size: 1.5rem;
+  }
+
   .table {
+    font-size: 0.85rem;
+  }
+
+  /* Grid responsive */
+  .grid > div {
+    flex: 0 0 100%;
+  }
+}
+
+/* Móviles estándar (481px - 576px) */
+@media (min-width: 481px) and (max-width: 576px) {
+  .container-fluid {
+    padding: 0.75rem;
+  }
+
+  .page-header {
+    padding: var(--spacing-sm);
+    margin: calc(var(--spacing-sm) * -1);
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--border-radius);
+  }
+
+  .page-header-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .page-header-title h1 {
+    font-size: 1.1rem;
+  }
+
+  .page-header-title i {
+    font-size: 1.5rem;
+  }
+
+  .page-header-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .card {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .card-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9rem;
+  }
+
+  .card-body {
+    padding: var(--spacing-sm);
+  }
+
+  .p-panel .p-panel-header {
+    padding: 0.75rem 0.875rem;
+  }
+
+  .p-panel .p-panel-title {
+    font-size: 0.95rem;
+  }
+
+  .p-panel .p-panel-content {
+    padding: 0.875rem;
+  }
+
+  .p-datatable .p-datatable-header {
+    padding: 0.75rem;
+  }
+
+  .p-datatable .p-datatable-thead > tr > th {
+    font-size: 0.7rem;
+    padding: 0.5rem;
+    min-width: 80px !important;
+  }
+
+  .p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .p-paginator {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .p-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .p-button-rounded {
+    width: 1.875rem;
+    height: 1.875rem;
+  }
+
+  .p-button-sm {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.625rem;
+  }
+
+  .form-control,
+  .form-select,
+  .p-inputtext,
+  .p-inputtextarea {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .form-label,
+  label {
+    font-size: 0.85rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.6em;
+  }
+
+  .p-tag {
+    font-size: 0.75rem;
+    padding: 0.325rem 0.5rem;
+  }
+
+  .progress {
+    height: 20px;
+    font-size: 0.75rem;
+  }
+
+  .p-progressbar {
+    height: 1rem;
+  }
+
+  .stats-card {
+    padding: var(--spacing-sm);
+  }
+
+  .stats-card h3 {
+    font-size: 1.25rem;
+  }
+
+  .stats-card p {
+    font-size: 0.85rem;
+  }
+
+  .filter-section {
+    padding: var(--spacing-md);
+  }
+
+  /* Grid full width en móviles */
+  .grid > div {
+    flex: 0 0 100%;
+  }
+
+  .gap-2 {
+    gap: 0.375rem;
+  }
+}
+
+/* Móviles pequeños (320px - 480px) */
+@media (max-width: 480px) {
+  .container-fluid {
+    padding: 0.5rem;
+  }
+
+  .py-4 {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  .page-header {
+    padding: var(--spacing-xs);
+    margin: calc(var(--spacing-xs) * -1);
+    margin-bottom: var(--spacing-sm);
+    border-radius: var(--border-radius);
+  }
+
+  .page-header-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.375rem;
+  }
+
+  .page-header-title h1 {
+    font-size: 1rem;
+  }
+
+  .page-header-title i {
+    font-size: 1.25rem;
+  }
+
+  .page-header-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .page-header-content {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .card {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .card-header {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .card-body {
+    padding: 0.75rem;
+  }
+
+  .p-panel .p-panel-header {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .p-panel .p-panel-title {
+    font-size: 0.875rem;
+  }
+
+  .p-panel .p-panel-content {
+    padding: 0.75rem;
+  }
+
+  .p-datatable .p-datatable-header {
+    padding: 0.5rem;
+  }
+
+  .p-datatable .p-datatable-thead > tr > th {
+    font-size: 0.65rem;
+    padding: 0.375rem 0.5rem;
+    min-width: 70px !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .p-paginator {
+    padding: 0.375rem;
+    font-size: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .p-paginator .p-paginator-current {
+    font-size: 0.7rem;
+  }
+
+  .btn {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+  }
+
+  .p-button {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+  }
+
+  .p-button-rounded {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .p-button-sm {
+    font-size: 0.7rem;
+    padding: 0.325rem 0.5rem;
+  }
+
+  .p-button .pi {
+    font-size: 0.875rem;
+  }
+
+  .form-control,
+  .form-select,
+  .p-inputtext,
+  .p-inputtextarea {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .form-label,
+  label {
+    font-size: 0.8rem;
+    margin-bottom: 0.325rem;
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.3em 0.5em;
+  }
+
+  .p-tag {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.45rem;
+  }
+
+  .progress {
+    height: 18px;
+    font-size: 0.7rem;
+  }
+
+  .p-progressbar {
+    height: 0.875rem;
+  }
+
+  .stats-card {
+    padding: 0.75rem;
+  }
+
+  .stats-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .stats-card p {
+    font-size: 0.8rem;
+  }
+
+  .filter-section {
+    padding: var(--spacing-sm);
+  }
+
+  .filter-section h6 {
+    font-size: 0.85rem;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .alert {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.8rem;
+  }
+
+  .table {
+    font-size: 0.7rem;
+  }
+
+  /* Grid full width en móviles */
+  .grid > div {
+    flex: 0 0 100%;
+    padding: 0.375rem;
+  }
+
+  .gap-2 {
+    gap: 0.325rem;
+  }
+
+  .mb-2,
+  .mb-3 {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .mb-4 {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .mt-3,
+  .mt-4 {
+    margin-top: 0.75rem !important;
+  }
+
+  /* Ajuste de multiselect y dropdowns */
+  .p-multiselect,
+  .p-dropdown {
+    font-size: 0.75rem;
+  }
+
+  .p-multiselect .p-multiselect-label,
+  .p-dropdown .p-dropdown-label {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  /* Tooltips más pequeños */
+  .p-tooltip .p-tooltip-text {
+    font-size: 0.7rem;
+    padding: 0.375rem 0.5rem;
+  }
+
+  /* Ajuste de iconos en inputs */
+  .p-inputgroup-addon {
+    padding: 0.375rem 0.5rem;
+  }
+
+  .p-inputgroup-addon i {
     font-size: 0.875rem;
   }
 }
@@ -504,10 +1071,47 @@ body {
   width: 100%;
   overflow-x: auto;
   overflow-y: visible;
-  max-width: calc(100vw - 350px); /* Ancho de ventana menos sidebar */
+  /* Cálculo: Sidebar (280px) + Content padding (64px) + Panel padding (48px) + Margen (20px) = ~410px */
+  max-width: calc(100vw - 410px);
 }
 
+/* Pantallas grandes (>1600px) */
+@media (min-width: 1601px) {
+  .table-wrapper {
+    max-width: calc(100vw - 420px);
+  }
+}
+
+/* Pantallas medianas-grandes (1367px - 1600px) */
+@media (min-width: 1367px) and (max-width: 1600px) {
+  .table-wrapper {
+    max-width: calc(100vw - 400px);
+  }
+}
+
+/* Pantallas medianas (1024px - 1366px) */
+@media (min-width: 1024px) and (max-width: 1366px) {
+  .table-wrapper {
+    max-width: calc(100vw - 380px);
+  }
+}
+
+/* Tablets en landscape y pantallas pequeñas (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .table-wrapper {
+    max-width: calc(100vw - 340px);
+  }
+}
+
+/* Tablets y móviles (sin sidebar fijo) */
 @media (max-width: 992px) {
+  .table-wrapper {
+    max-width: calc(100vw - 80px);
+  }
+}
+
+/* Móviles */
+@media (max-width: 576px) {
   .table-wrapper {
     max-width: calc(100vw - 40px);
   }
