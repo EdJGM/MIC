@@ -1,7 +1,11 @@
 /* ===================================
    ESPE - Sistema de Gestión de Procesos
-   Estilos Globales
+   Estilos Globales con PrimeNG
    =================================== */
+
+/* PrimeNG Flex Grid */
+@import "primeng/resources/primeng.min.css";
+@import "primeicons/primeicons.css";
 
 /* Variables CSS Personalizadas */
 :root {
@@ -10,7 +14,7 @@
   --espe-green-dark: #0d5c3a;
   --espe-green-light: #2b9a68;
   --espe-green-lighter: #e8f5f0;
-  
+
   /* Colores Complementarios */
   --espe-orange: #ff6b35;
   --espe-blue: #0077be;
@@ -18,18 +22,18 @@
   --espe-gray: #6c757d;
   --espe-gray-light: #dee2e6;
   --espe-gray-lighter: #f8f9fa;
-  
+
   /* Espaciado */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
-  
+
   /* Bordes */
   --border-radius: 0.5rem;
   --border-radius-lg: 0.75rem;
-  
+
   /* Sombras */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -466,4 +470,382 @@ body {
     box-shadow: none;
     border: 1px solid var(--espe-gray-light);
   }
+}
+
+/* ===================================
+   PRIMENG CUSTOMIZATIONS
+   =================================== */
+
+/* PrimeNG Panel */
+.p-panel {
+  box-shadow: var(--shadow-md);
+  border-radius: var(--border-radius-lg);
+}
+
+.p-panel .p-panel-header {
+  background: linear-gradient(135deg, var(--espe-green-primary) 0%, var(--espe-green-dark) 100%);
+  color: white;
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  padding: 1rem 1.5rem;
+}
+
+.p-panel .p-panel-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.p-panel .p-panel-content {
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+/* Contenedor de tabla con scroll interno */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  max-width: calc(100vw - 350px); /* Ancho de ventana menos sidebar */
+}
+
+@media (max-width: 992px) {
+  .table-wrapper {
+    max-width: calc(100vw - 40px);
+  }
+}
+
+.table-wrapper .p-datatable {
+  min-width: 900px; /* Ancho mínimo para forzar scroll */
+}
+
+/* Fix para que p-table no se desborde */
+.p-datatable-wrapper {
+  overflow: visible !important;
+}
+
+/* PrimeNG Card Form */
+.p-card-form {
+  border: 2px solid var(--espe-green-light);
+  border-radius: var(--border-radius-lg);
+}
+
+.p-card-form .p-card-header {
+  background: var(--espe-green-lighter);
+  color: var(--espe-green-dark);
+  font-weight: 600;
+  padding: 1rem;
+  border-bottom: 1px solid var(--espe-green-light);
+}
+
+/* PrimeNG Table */
+.p-datatable .p-datatable-header {
+  background: var(--espe-gray-lighter);
+  border: none;
+  padding: 1rem;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  background: var(--espe-gray-dark);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  padding: 0.75rem 1rem;
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  transition: background-color 0.2s ease;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background-color: var(--espe-green-lighter) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.75rem 1rem;
+}
+
+/* PrimeNG Paginator */
+.p-paginator {
+  background: var(--espe-gray-lighter);
+  border: none;
+  padding: 0.75rem;
+}
+
+.p-paginator .p-paginator-current {
+  color: var(--espe-gray-dark);
+}
+
+/* PrimeNG MultiSelect (Column Toggle) */
+.column-toggle .p-multiselect {
+  min-width: 250px;
+}
+
+.column-toggle .p-multiselect-label {
+  padding: 0.5rem 1rem;
+}
+
+/* PrimeNG Progress Bar */
+.p-progressbar {
+  border-radius: var(--border-radius);
+  background: var(--espe-gray-light);
+}
+
+.p-progressbar .p-progressbar-value {
+  background: linear-gradient(90deg, var(--espe-green-light), var(--espe-green-primary));
+}
+
+/* PrimeNG Tag */
+.p-tag {
+  font-weight: 500;
+  border-radius: var(--border-radius);
+}
+
+/* PrimeNG Button - Colores Institucionales ESPE */
+.p-button {
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+/* Botón Success - Verde ESPE */
+.p-button.p-button-success {
+  background: var(--espe-green-primary) !important;
+  border-color: var(--espe-green-primary) !important;
+}
+
+.p-button.p-button-success:hover,
+.p-button.p-button-success:focus {
+  background: var(--espe-green-dark) !important;
+  border-color: var(--espe-green-dark) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(26, 123, 78, 0.3);
+}
+
+/* Botón Primary - Verde ESPE */
+.p-button.p-button-primary {
+  background: var(--espe-green-primary) !important;
+  border-color: var(--espe-green-primary) !important;
+}
+
+.p-button.p-button-primary:hover,
+.p-button.p-button-primary:focus {
+  background: var(--espe-green-dark) !important;
+  border-color: var(--espe-green-dark) !important;
+}
+
+/* Botón Secondary */
+.p-button.p-button-secondary {
+  background: var(--espe-gray) !important;
+  border-color: var(--espe-gray) !important;
+  color: white !important;
+}
+
+.p-button.p-button-secondary:hover,
+.p-button.p-button-secondary:focus {
+  background: var(--espe-gray-dark) !important;
+  border-color: var(--espe-gray-dark) !important;
+}
+
+/* Botón Warning - Amarillo */
+.p-button.p-button-warning {
+  background: #ffc107 !important;
+  border-color: #ffc107 !important;
+  color: #212529 !important;
+}
+
+.p-button.p-button-warning:hover,
+.p-button.p-button-warning:focus {
+  background: #e0a800 !important;
+  border-color: #e0a800 !important;
+}
+
+/* Botón Danger - Rojo */
+.p-button.p-button-danger {
+  background: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+
+.p-button.p-button-danger:hover,
+.p-button.p-button-danger:focus {
+  background: #c82333 !important;
+  border-color: #c82333 !important;
+}
+
+/* Botón Info - Azul */
+.p-button.p-button-info {
+  background: var(--espe-blue) !important;
+  border-color: var(--espe-blue) !important;
+}
+
+.p-button.p-button-info:hover,
+.p-button.p-button-info:focus {
+  background: #005a8c !important;
+  border-color: #005a8c !important;
+}
+
+/* Botones de texto (iconos) */
+.p-button.p-button-text.p-button-warning {
+  color: #ffc107 !important;
+  background: transparent !important;
+}
+
+.p-button.p-button-text.p-button-warning:hover {
+  background: rgba(255, 193, 7, 0.1) !important;
+}
+
+.p-button.p-button-text.p-button-danger {
+  color: #dc3545 !important;
+  background: transparent !important;
+}
+
+.p-button.p-button-text.p-button-danger:hover {
+  background: rgba(220, 53, 69, 0.1) !important;
+}
+
+.p-button.p-button-text.p-button-info {
+  color: var(--espe-blue) !important;
+  background: transparent !important;
+}
+
+.p-button.p-button-text.p-button-info:hover {
+  background: rgba(0, 119, 190, 0.1) !important;
+}
+
+/* PrimeNG Input */
+.p-inputtext {
+  border-radius: var(--border-radius);
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--espe-gray-light);
+}
+
+.p-inputtext:focus {
+  border-color: var(--espe-green-primary);
+  box-shadow: 0 0 0 0.2rem rgba(26, 123, 78, 0.25);
+}
+
+/* PrimeNG InputTextarea */
+.p-inputtextarea {
+  border-radius: var(--border-radius);
+}
+
+/* PrimeNG Flex Grid System */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -0.5rem;
+  margin-left: -0.5rem;
+}
+
+.col-12 {
+  flex: 0 0 100%;
+  padding: 0.5rem;
+}
+
+@media screen and (min-width: 768px) {
+  .md\:col-2 {
+    flex: 0 0 16.6667%;
+    padding: 0.5rem;
+  }
+  .md\:col-4 {
+    flex: 0 0 33.3333%;
+    padding: 0.5rem;
+  }
+  .md\:col-5 {
+    flex: 0 0 41.6667%;
+    padding: 0.5rem;
+  }
+  .md\:col-6 {
+    flex: 0 0 50%;
+    padding: 0.5rem;
+  }
+  .md\:col-8 {
+    flex: 0 0 66.6667%;
+    padding: 0.5rem;
+  }
+}
+
+/* Utility Classes */
+.w-full {
+  width: 100%;
+}
+
+.block {
+  display: block;
+}
+
+.flex {
+  display: flex;
+}
+
+.align-items-end {
+  align-items: flex-end;
+}
+
+.justify-content-end {
+  justify-content: flex-end;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.mt-4 {
+  margin-top: 1.5rem;
+}
+
+.mr-1 {
+  margin-right: 0.25rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.p-3 {
+  padding: 1rem;
+}
+
+.p-4 {
+  padding: 1.5rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.border-round {
+  border-radius: var(--border-radius);
+}
+
+.text-color-secondary {
+  color: var(--espe-gray);
+}
+
+.text-primary {
+  color: var(--espe-green-primary) !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
 }

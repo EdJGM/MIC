@@ -1,197 +1,202 @@
 <div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">
-                        <i class="bi bi-flow-chart"></i> Gestión de Procesos (Nivel 2)
-                    </h4>
-                    <button class="btn btn-light btn-sm" (click)="nuevoProceso()">
-                        <i class="bi bi-plus-circle"></i> Nuevo Proceso
-                    </button>
-                </div>
+  <div class="row">
+    <div class="col-12">
+      <p-panel header="Gestión de Procesos (Nivel 2)" [toggleable]="false">
+        <ng-template pTemplate="icons">
+          <button pButton pRipple type="button" icon="pi pi-plus"
+                  class="p-button-rounded p-button-success p-button-sm"
+                  (click)="nuevoProceso()" pTooltip="Nuevo Proceso"></button>
+        </ng-template>
 
-                <div class="card-body">
-                    <!-- Filtros -->
-                    <div class="row mb-3">
-                        <div class="col-md-8">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="bi bi-funnel"></i>
-                                </span>
-                                <select class="form-select" [(ngModel)]="filtroMacroproceso" name="filtroMacroproceso">
-                                    <option [value]="null">Todos los Macroprocesos</option>
-                                    <option *ngFor="let mp of macroprocesos" [value]="mp.id">
-                                        {{ mp.codigo }} - {{ mp.nombre }}
-                                    </option>
-                                </select>
-                                <button class="btn btn-primary" (click)="aplicarFiltro()">
-                                    <i class="bi bi-search"></i> Filtrar
-                                </button>
-                                <button class="btn btn-secondary" (click)="limpiarFiltro()">
-                                    <i class="bi bi-x-circle"></i> Limpiar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Formulario de Creación/Edición -->
-                    <div *ngIf="mostrarFormulario" class="mb-4">
-                        <div class="card border-success">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0">
-                                    {{ modoEdicion ? 'Editar' : 'Nuevo' }} Proceso
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <form (ngSubmit)="guardar()">
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <label class="form-label">Macroproceso Padre *</label>
-                                            <select class="form-select" [(ngModel)]="formulario.macroprocesoId"
-                                                name="macroprocesoId" required>
-                                                <option [value]="0">Seleccione un macroproceso</option>
-                                                <option *ngFor="let mp of macroprocesos" [value]="mp.id">
-                                                    {{ mp.codigo }} - {{ mp.nombre }} ({{ mp.unidadEstrategica }})
-                                                </option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <label class="form-label">Nombre del Proceso *</label>
-                                            <input type="text" class="form-control" [(ngModel)]="formulario.nombre"
-                                                name="nombre" required placeholder="Ingrese el nombre del proceso">
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <label class="form-label">Descripción</label>
-                                            <textarea class="form-control" rows="2" [(ngModel)]="formulario.descripcion"
-                                                name="descripcion" placeholder="Describa el proceso"></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <label class="form-label">Objetivos del Proceso</label>
-                                            <textarea class="form-control" rows="2" [(ngModel)]="formulario.objetivos"
-                                                name="objetivos"
-                                                placeholder="Describa los objetivos del proceso"></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">Estado de Documentación</label>
-                                            <select class="form-select" [(ngModel)]="formulario.estadoDocumentacion"
-                                                name="estadoDocumentacion">
-                                                <option *ngFor="let estado of estadosDocumentacion" [value]="estado">
-                                                    {{ getEstadoNombre(estado) }}
-                                                </option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <button type="button" class="btn btn-secondary" (click)="cancelar()">
-                                            <i class="bi bi-x-circle"></i> Cancelar
-                                        </button>
-                                        <button type="submit" class="btn btn-success">
-                                            <i class="bi bi-save"></i> {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tabla de Procesos -->
-                    <div class="table-responsive">
-                        <table class="table table-hover table-striped">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Código</th>
-                                    <th>Nombre</th>
-                                    <th>Macroproceso</th>
-                                    <th>Objetivos</th>
-                                    <th>Estado</th>
-                                    <th>Avance</th>
-                                    <th>Subprocesos</th>
-                                    <th class="text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let p of procesos">
-                                    <td><strong class="text-success">{{ p.codigo }}</strong></td>
-                                    <td>{{ p.nombre }}</td>
-                                    <td>
-                                        <span class="badge bg-info">{{ p.macroprocesoNombre }}</span>
-                                    </td>
-                                    <td>
-                                        <small>{{ p.objetivos | slice:0:50 }}{{ p.objetivos && p.objetivos.length > 50 ?
-                                            '...' : '' }}</small>
-                                    </td>
-                                    <td>
-                                        <span class="badge" [ngClass]="getEstadoClass(p.estadoDocumentacion)">
-                                            {{ getEstadoNombre(p.estadoDocumentacion) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="progress" style="height: 25px;">
-                                            <div class="progress-bar"
-                                                [ngClass]="getProgressBarClass(p.porcentajeAvance)"
-                                                [style.width.%]="p.porcentajeAvance" role="progressbar"
-                                                [attr.aria-valuenow]="p.porcentajeAvance" aria-valuemin="0"
-                                                aria-valuemax="100">
-                                                {{ p.porcentajeAvance }}%
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-secondary">{{ p.cantidadSubprocesos || 0 }}</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <button class="btn btn-outline-info" (click)="verDetalle(p)"
-                                                title="Ver Detalle">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
-                                            <button class="btn btn-outline-primary" (click)="editarProceso(p)"
-                                                title="Editar">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                            <button class="btn btn-outline-danger" (click)="eliminar(p)"
-                                                title="Eliminar">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr *ngIf="procesos.length === 0">
-                                    <td colspan="8" class="text-center text-muted py-4">
-                                        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                                        <p class="mt-2">No hay procesos registrados</p>
-                                        <small *ngIf="filtroMacroproceso">Intente con otros filtros</small>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Resumen -->
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle"></i>
-                                <strong>Total de procesos:</strong> {{ procesos.length }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Filtros -->
+        <div class="grid mb-3">
+          <div class="col-12 md:col-8">
+            <div class="p-inputgroup">
+              <span class="p-inputgroup-addon">
+                <i class="pi pi-filter"></i>
+              </span>
+              <select class="p-inputtext" [(ngModel)]="filtroMacroproceso" name="filtroMacroproceso" style="flex: 1">
+                <option [ngValue]="null">Todos los Macroprocesos</option>
+                <option *ngFor="let mp of macroprocesos" [ngValue]="mp.id">
+                  {{ mp.codigo }} - {{ mp.nombre }}
+                </option>
+              </select>
+              <button pButton type="button" icon="pi pi-search" label="Filtrar"
+                      class="p-button-primary" (click)="aplicarFiltro()"></button>
+              <button pButton type="button" icon="pi pi-times" label="Limpiar"
+                      class="p-button-secondary" (click)="limpiarFiltro()"></button>
             </div>
+          </div>
         </div>
+
+        <!-- Formulario Desglosable (Inline Expandible) -->
+        <div *ngIf="mostrarFormulario" class="mb-4">
+          <p-card [header]="modoEdicion ? 'Editar Proceso' : 'Nuevo Proceso'"
+                  styleClass="p-card-form">
+            <form (ngSubmit)="guardar()" #formProceso="ngForm">
+              <div class="grid">
+                <div class="col-12">
+                  <label for="macroprocesoId" class="block font-medium mb-2">Macroproceso Padre *</label>
+                  <select class="p-inputtext w-full" [(ngModel)]="formulario.macroprocesoId"
+                          name="macroprocesoId" required>
+                    <option [ngValue]="0">Seleccione un macroproceso</option>
+                    <option *ngFor="let mp of macroprocesos" [ngValue]="mp.id">
+                      {{ mp.codigo }} - {{ mp.nombre }} ({{ mp.unidadEstrategica }})
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid mt-3">
+                <div class="col-12">
+                  <label for="nombre" class="block font-medium mb-2">Nombre del Proceso *</label>
+                  <input pInputText id="nombre" [(ngModel)]="formulario.nombre" name="nombre"
+                         required class="w-full" placeholder="Ingrese el nombre del proceso">
+                </div>
+              </div>
+
+              <div class="grid mt-3">
+                <div class="col-12">
+                  <label for="descripcion" class="block font-medium mb-2">Descripción</label>
+                  <textarea pInputTextarea id="descripcion" [(ngModel)]="formulario.descripcion"
+                            name="descripcion" rows="2" class="w-full"
+                            placeholder="Describa el proceso"></textarea>
+                </div>
+              </div>
+
+              <div class="grid mt-3">
+                <div class="col-12">
+                  <label for="objetivos" class="block font-medium mb-2">Objetivos del Proceso</label>
+                  <textarea pInputTextarea id="objetivos" [(ngModel)]="formulario.objetivos"
+                            name="objetivos" rows="2" class="w-full"
+                            placeholder="Describa los objetivos del proceso"></textarea>
+                </div>
+              </div>
+
+              <div class="grid mt-3">
+                <div class="col-12 md:col-6">
+                  <label for="estadoDocumentacion" class="block font-medium mb-2">Estado de Documentación</label>
+                  <select class="p-inputtext w-full" [(ngModel)]="formulario.estadoDocumentacion"
+                          name="estadoDocumentacion">
+                    <option *ngFor="let estado of estadosDocumentacion" [value]="estado">
+                      {{ getEstadoNombre(estado) }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="flex justify-content-end gap-2 mt-4">
+                <button pButton type="button" label="Cancelar" icon="pi pi-times"
+                        class="p-button-secondary" (click)="cancelar()"></button>
+                <button pButton type="submit" [label]="modoEdicion ? 'Actualizar' : 'Guardar'"
+                        icon="pi pi-save" class="p-button-success"
+                        [disabled]="!formProceso.valid"></button>
+              </div>
+            </form>
+          </p-card>
+        </div>
+
+        <!-- Column Toggle -->
+        <div class="mb-3">
+          <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
+                         selectedItemsLabel="{0} columnas seleccionadas"
+                         placeholder="Seleccionar columnas"
+                         styleClass="column-toggle"></p-multiSelect>
+        </div>
+
+        <!-- Tabla PrimeNG con scroll horizontal y sorting -->
+        <div class="table-wrapper">
+        <p-table [value]="procesos"
+                 styleClass="p-datatable-striped p-datatable-gridlines"
+                 [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 25, 50]"
+                 [globalFilterFields]="['codigo', 'nombre', 'macroprocesoNombre', 'objetivos']">
+
+          <ng-template pTemplate="header">
+            <tr>
+              <th *ngIf="isColumnVisible('codigo')" pSortableColumn="codigo" style="min-width: 120px">
+                Código <p-sortIcon field="codigo"></p-sortIcon>
+              </th>
+              <th *ngIf="isColumnVisible('nombre')" pSortableColumn="nombre" style="min-width: 200px">
+                Nombre <p-sortIcon field="nombre"></p-sortIcon>
+              </th>
+              <th *ngIf="isColumnVisible('macroprocesoNombre')" pSortableColumn="macroprocesoNombre" style="min-width: 150px">
+                Macroproceso <p-sortIcon field="macroprocesoNombre"></p-sortIcon>
+              </th>
+              <th *ngIf="isColumnVisible('objetivos')" pSortableColumn="objetivos" style="min-width: 200px">
+                Objetivos <p-sortIcon field="objetivos"></p-sortIcon>
+              </th>
+              <th *ngIf="isColumnVisible('estadoDocumentacion')" pSortableColumn="estadoDocumentacion" style="min-width: 150px">
+                Estado <p-sortIcon field="estadoDocumentacion"></p-sortIcon>
+              </th>
+              <th *ngIf="isColumnVisible('porcentajeAvance')" pSortableColumn="porcentajeAvance" style="min-width: 150px">
+                Avance <p-sortIcon field="porcentajeAvance"></p-sortIcon>
+              </th>
+              <th *ngIf="isColumnVisible('cantidadSubprocesos')" pSortableColumn="cantidadSubprocesos" style="min-width: 120px">
+                Subprocesos <p-sortIcon field="cantidadSubprocesos"></p-sortIcon>
+              </th>
+              <th style="min-width: 150px; text-align: center">Acciones</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-p>
+            <tr>
+              <td *ngIf="isColumnVisible('codigo')">
+                <strong class="text-primary">{{ p.codigo }}</strong>
+              </td>
+              <td *ngIf="isColumnVisible('nombre')">{{ p.nombre }}</td>
+              <td *ngIf="isColumnVisible('macroprocesoNombre')">
+                <p-tag [value]="p.macroprocesoNombre" severity="info"></p-tag>
+              </td>
+              <td *ngIf="isColumnVisible('objetivos')">
+                <span pTooltip="{{ p.objetivos }}" tooltipPosition="top">
+                  {{ p.objetivos?.substring(0, 50) }}{{ p.objetivos?.length > 50 ? '...' : '' }}
+                </span>
+              </td>
+              <td *ngIf="isColumnVisible('estadoDocumentacion')">
+                <p-tag [value]="getEstadoNombre(p.estadoDocumentacion)"
+                       [severity]="getEstadoSeverity(p.estadoDocumentacion)"></p-tag>
+              </td>
+              <td *ngIf="isColumnVisible('porcentajeAvance')">
+                <p-progressBar [value]="p.porcentajeAvance" [showValue]="true"
+                               [style]="{'height': '20px'}"></p-progressBar>
+              </td>
+              <td *ngIf="isColumnVisible('cantidadSubprocesos')">
+                <p-tag [value]="(p.cantidadSubprocesos || 0).toString()" severity="secondary"></p-tag>
+              </td>
+              <td style="text-align: center">
+                <button pButton pRipple type="button" icon="pi pi-eye"
+                        class="p-button-rounded p-button-text p-button-info"
+                        (click)="verDetalle(p)" pTooltip="Ver Detalle"></button>
+                <button pButton pRipple type="button" icon="pi pi-pencil"
+                        class="p-button-rounded p-button-text p-button-warning"
+                        (click)="editarProceso(p)" pTooltip="Editar"></button>
+                <button pButton pRipple type="button" icon="pi pi-trash"
+                        class="p-button-rounded p-button-text p-button-danger"
+                        (click)="eliminar(p)" pTooltip="Eliminar"></button>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td [attr.colspan]="selectedColumns.length + 1" class="text-center p-4">
+                <i class="pi pi-inbox" style="font-size: 2rem; color: var(--text-color-secondary)"></i>
+                <p class="mt-2 text-color-secondary">No hay procesos registrados</p>
+                <small *ngIf="filtroMacroproceso" class="text-color-secondary">Intente con otros filtros</small>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+        </div>
+
+        <!-- Resumen -->
+        <div class="mt-3">
+          <div class="p-3 border-round" style="background-color: var(--blue-50); border-left: 4px solid var(--blue-500);">
+            <i class="pi pi-info-circle mr-2"></i>
+            <strong>Total de procesos:</strong> {{ procesos.length }}
+          </div>
+        </div>
+      </p-panel>
     </div>
+  </div>
 </div>

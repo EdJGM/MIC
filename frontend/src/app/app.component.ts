@@ -14,14 +14,14 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
           <img src="assets/espe-logo.png" alt="ESPE Logo" class="logo-small" onerror="this.style.display='none'">
           <h4 class="sidebar-title">
             <i class="bi bi-diagram-3-fill"></i>
-            Sistema de Gestión
+            Sistema de Gestión Integrado 
           </h4>
-          <p class="sidebar-subtitle">Inventario de Procesos</p>
+          <p class="sidebar-subtitle">SGI-ESPE</p>
         </div>
 
         <nav class="sidebar-nav">
           <div class="nav-section">
-            <h6 class="nav-section-title">REPOSITORIO DE INFORMACIÓN</h6>
+            <h6 class="nav-section-title">INVENTARIO DE PROCESOS</h6>
             
             <a class="nav-item" routerLink="/macroprocesos" routerLinkActive="active">
               <i class="bi bi-diagram-3"></i>
@@ -29,7 +29,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
             </a>
             
             <a class="nav-item" routerLink="/procesos" routerLinkActive="active">
-              <i class="bi bi-flow-chart"></i>
+              <i class="bi bi-diagram-2"></i>
               <span>Procesos</span>
             </a>
             
@@ -38,15 +38,11 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
               <span>Subprocesos</span>
             </a>
           </div>
-        </nav>
-
-        <div class="sidebar-footer">
-          <div class="user-info">
-            <i class="bi bi-person-circle"></i>
-            <span>CACHIGUANGO, DENILSON</span>
+          <div class="nav-section">
+            <h6 class="nav-section-title">LISTA INFORMACION DOCUMENTADA</h6>
           </div>
-         
-        </div>
+
+        </nav>
       </aside>
 
       <!-- Main Content -->
@@ -57,7 +53,6 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
             <button class="menu-toggle" (click)="toggleSidebar()">
               <i class="bi bi-list"></i>
             </button>
-            <h5 class="page-title">MENÚ</h5>
           </div>
           <div class="header-right">
             <span class="user-name">CACHIGUANGO, DENILSON</span>
@@ -206,7 +201,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
     }
 
     .nav-item.active {
-      background-color: rgba(255, 255, 255, 0.15);
+      background-color: var(--espe-green);
       color: white;
       font-weight: 600;
       border-left-color: white;

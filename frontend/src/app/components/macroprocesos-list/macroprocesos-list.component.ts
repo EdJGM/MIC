@@ -2,17 +2,49 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MacroprocesoService } from '../../services/macroproceso.service';
-import { 
-  Macroproceso, 
+import {
+  Macroproceso,
   MacroprocesoRequest,
-  TipoMacroproceso, 
-  EstadoDocumentacion 
+  TipoMacroproceso,
+  EstadoDocumentacion
 } from '../../models/inventario.model';
+
+// PrimeNG Imports
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { DropdownModule } from 'primeng/dropdown';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
+import { CardModule } from 'primeng/card';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { PanelModule } from 'primeng/panel';
+
+interface Column {
+  field: string;
+  header: string;
+}
 
 @Component({
   selector: 'app-macroprocesos-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    ButtonModule,
+    InputTextModule,
+    DropdownModule,
+    MultiSelectModule,
+    ProgressBarModule,
+    TagModule,
+    TooltipModule,
+    CardModule,
+    InputTextareaModule,
+    PanelModule
+  ],
   templateUrl: './macroprocesos-list.component.html',
   styleUrls: ['./macroprocesos-list.component.css']
 })
@@ -21,18 +53,37 @@ export class MacroprocesosListComponent implements OnInit {
   macroprocesoSeleccionado: Macroproceso | null = null;
   modoEdicion = false;
   mostrarFormulario = false;
-  
+
   // Para el formulario
   formulario: MacroprocesoRequest = this.inicializarFormulario();
-  
+
   // Enumeraciones para templates
   tiposMacroproceso = Object.values(TipoMacroproceso);
   estadosDocumentacion = Object.values(EstadoDocumentacion);
-  
+
+  // Column toggle
+  cols: Column[] = [];
+  selectedColumns: Column[] = [];
+
   constructor(private macroprocesoService: MacroprocesoService) {}
 
   ngOnInit(): void {
     this.cargarMacroprocesos();
+    this.initColumns();
+  }
+
+  initColumns(): void {
+    this.cols = [
+      { field: 'codigo', header: 'Código' },
+      { field: 'tipo', header: 'Tipo' },
+      { field: 'nombre', header: 'Nombre' },
+      { field: 'unidadEstrategica', header: 'Unidad Estratégica' },
+      { field: 'responsablePrincipal', header: 'Responsable' },
+      { field: 'estadoDocumentacion', header: 'Estado' },
+      { field: 'porcentajeAvance', header: 'Avance' },
+      { field: 'cantidadProcesos', header: 'Procesos' }
+    ];
+    this.selectedColumns = this.cols;
   }
 
   cargarMacroprocesos(): void {
@@ -144,18 +195,18 @@ export class MacroprocesosListComponent implements OnInit {
     };
   }
 
-  getEstadoClass(estado: EstadoDocumentacion): string {
-    const classMap: { [key in EstadoDocumentacion]: string } = {
-      [EstadoDocumentacion.NO_DOCUMENTADO]: 'bg-secondary',
-      [EstadoDocumentacion.LEVANTAMIENTO]: 'bg-info',
-      [EstadoDocumentacion.FLUJODIAGRAMACION]: 'bg-primary',
-      [EstadoDocumentacion.CARACTERIZACION]: 'bg-warning',
-      [EstadoDocumentacion.VALIDACION]: 'bg-warning',
-      [EstadoDocumentacion.LEGALIZADO]: 'bg-success',
-      [EstadoDocumentacion.DIFUNDIDO]: 'bg-success',
-      [EstadoDocumentacion.MEJORA]: 'bg-success'
+  getEstadoSeverity(estado: EstadoDocumentacion): "success" | "secondary" | "info" | "warning" | "danger" | "contrast" | undefined {
+    const severityMap: { [key in EstadoDocumentacion]: "success" | "secondary" | "info" | "warning" | "danger" | "contrast" } = {
+      [EstadoDocumentacion.NO_DOCUMENTADO]: 'secondary',
+      [EstadoDocumentacion.LEVANTAMIENTO]: 'info',
+      [EstadoDocumentacion.FLUJODIAGRAMACION]: 'info',
+      [EstadoDocumentacion.CARACTERIZACION]: 'warning',
+      [EstadoDocumentacion.VALIDACION]: 'warning',
+      [EstadoDocumentacion.LEGALIZADO]: 'success',
+      [EstadoDocumentacion.DIFUNDIDO]: 'success',
+      [EstadoDocumentacion.MEJORA]: 'success'
     };
-    return classMap[estado];
+    return severityMap[estado];
   }
 
   getEstadoNombre(estado: EstadoDocumentacion): string {
@@ -170,5 +221,17 @@ export class MacroprocesosListComponent implements OnInit {
       [EstadoDocumentacion.MEJORA]: 'Mejora'
     };
     return nombreMap[estado];
+  }
+
+  getProgressBarColor(porcentaje: number): string {
+    if (porcentaje === 0) return '#6c757d';
+    if (porcentaje < 60) return '#17a2b8';
+    if (porcentaje < 75) return '#ffc107';
+    if (porcentaje < 90) return '#007bff';
+    return '#28a745';
+  }
+
+  isColumnVisible(field: string): boolean {
+    return this.selectedColumns.some(col => col.field === field);
   }
 }
