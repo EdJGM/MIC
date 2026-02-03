@@ -1,0 +1,163 @@
+<div class="documentos-normativos-container">
+    <p-toast></p-toast>
+
+    <!-- Loading Spinner -->
+    <app-loading-spinner *ngIf="cargando"></app-loading-spinner>
+
+    <div class="form-section">
+        <div class="form-header">
+            <h3>Solicitud de Creación, Actualización o Eliminación de Información Documentada</h3>
+            <p class="subtitle">Complete el formulario con la información requerida. Los campos marcados con (*) son
+                obligatorios.</p>
+        </div>
+
+        <form class="form-container">
+
+            <div class="section-title">
+                <h4>1. DATOS DE SOLICITUD / PROCESO / DOCUMENTO</h4>
+            </div>
+
+            <div class="form-grid">
+                <!-- Fecha de Solicitud -->
+                <div class="form-field">
+                    <label for="fechaSolicitud">Fecha de Solicitud *</label>
+                    <app-calendar [(ngModel)]="formulario.fechaSolicitud" name="fechaSolicitud"
+                        placeholder="Seleccione fecha" [showIcon]="true">
+                    </app-calendar>
+                </div>
+
+                <!-- Unidad -->
+                <div class="form-field">
+                    <label for="unidad">Unidad *</label>
+                    <app-dropdown [(ngModel)]="formulario.unidad" name="unidad" [options]="unidadesList"
+                        placeholder="Seleccione unidad">
+                    </app-dropdown>
+                </div>
+
+                <!-- Solicitado por -->
+                <div class="form-field">
+                    <label for="solicitadoPor">Solicitado por (Responsable del proceso) *</label>
+                    <app-dropdown [(ngModel)]="formulario.solicitadoPor" name="solicitadoPor" [options]="usuariosList"
+                        placeholder="Seleccione usuario" [editable]="true">
+                    </app-dropdown>
+                </div>
+
+                <!-- Sede -->
+                <div class="form-field">
+                    <label for="sede">Sede *</label>
+                    <app-dropdown [(ngModel)]="formulario.sede" name="sede" [options]="sedes"
+                        placeholder="Seleccione sede">
+                    </app-dropdown>
+                </div>
+
+                <!-- Macroproceso -->
+                <div class="form-field">
+                    <label for="macroproceso">Macroproceso</label>
+                    <app-dropdown [(ngModel)]="formulario.macroprocesoId" name="macroproceso"
+                        [options]="macroprocesosList" placeholder="Seleccione macroproceso"
+                        (onChange)="onMacroprocesoChange($event)">
+                    </app-dropdown>
+                </div>
+
+                <!-- Proceso N1 -->
+                <div class="form-field">
+                    <label for="procesoN1">Proceso N1</label>
+                    <app-dropdown [(ngModel)]="formulario.procesoN1Id" name="procesoN1" [options]="procesosN1List"
+                        placeholder="Seleccione proceso N1" [disabled]="!formulario.macroprocesoId"
+                        (onChange)="onProcesoN1Change($event)">
+                    </app-dropdown>
+                </div>
+
+                <!-- Proceso N2 -->
+                <div class="form-field">
+                    <label for="procesoN2">Proceso N2</label>
+                    <app-dropdown [(ngModel)]="formulario.procesoN2Id" name="procesoN2" [options]="procesosN2List"
+                        placeholder="Seleccione proceso N2" [disabled]="!formulario.procesoN1Id">
+                    </app-dropdown>
+                </div>
+
+                <!-- Subproceso N1 -->
+                <div class="form-field">
+                    <label for="subprocesoN1">Subproceso N1</label>
+                    <app-dropdown [(ngModel)]="formulario.subprocesoN1Id" name="subprocesoN1"
+                        [options]="subprocesosN1List" placeholder="Seleccione subproceso N1"
+                        [disabled]="!formulario.procesoN1Id">
+                    </app-dropdown>
+                </div>
+
+                <!-- Subproceso N2 -->
+                <div class="form-field">
+                    <label for="subprocesoN2">Subproceso N2</label>
+                    <app-dropdown [(ngModel)]="formulario.subprocesoN2Id" name="subprocesoN2"
+                        [options]="subprocesosN2List" placeholder="Seleccione subproceso N2"
+                        [disabled]="!formulario.subprocesoN1Id">
+                    </app-dropdown>
+                </div>
+
+                <!-- Tipo de Documento -->
+                <div class="form-field">
+                    <label for="tipoDocumento">Tipo de Documento *</label>
+                    <app-dropdown [(ngModel)]="formulario.tipoDocumento" name="tipoDocumento" [options]="tiposDocumento"
+                        placeholder="Seleccione tipo">
+                    </app-dropdown>
+                </div>
+
+                <!-- Nombre del Documento -->
+                <div class="form-field full-width">
+                    <label for="nombreDocumento">Nombre del Documento *</label>
+                    <app-input-text [(ngModel)]="formulario.nombreDocumento" name="nombreDocumento"
+                        placeholder="Ingrese el nombre del documento">
+                    </app-input-text>
+                </div>
+
+                <!-- Fecha que se realiza el protocolo -->
+                <div class="form-field">
+                    <label for="fechaProtocolo">Fecha que se realiza el protocolo</label>
+                    <app-calendar [(ngModel)]="formulario.fechaProtocolo" name="fechaProtocolo"
+                        placeholder="Seleccione fecha" [showIcon]="true">
+                    </app-calendar>
+                </div>
+
+                <!-- Lugar que se realiza el evento -->
+                <div class="form-field">
+                    <label for="lugarEvento">Lugar que se realiza el evento</label>
+                    <app-input-text [(ngModel)]="formulario.lugarEvento" name="lugarEvento"
+                        placeholder="Ingrese el lugar">
+                    </app-input-text>
+                </div>
+
+                <!-- Enlace para acceder al archivo -->
+                <div class="form-field full-width">
+                    <label for="enlaceArchivo">Enlace para acceder al archivo</label>
+                    <app-input-text [(ngModel)]="formulario.enlaceArchivo" name="enlaceArchivo"
+                        placeholder="https://...">
+                    </app-input-text>
+                </div>
+
+                <!-- Motivo -->
+                <div class="form-field">
+                    <label for="motivo">Motivo *</label>
+                    <app-dropdown [(ngModel)]="formulario.motivo" name="motivo" [options]="motivos"
+                        placeholder="Seleccione motivo">
+                    </app-dropdown>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="form-field full-width">
+                    <label for="observaciones">Observaciones</label>
+                    <app-textarea [(ngModel)]="formulario.observaciones" name="observaciones"
+                        placeholder="Ingrese observaciones" [rows]="3">
+                    </app-textarea>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="form-actions">
+                <app-button-cancel label="Cancelar" (onClick)="cancelar()">
+                </app-button-cancel>
+                <app-button-primary label="Ingresar" icon="pi pi-save" (onClick)="guardar()" [disabled]="cargando">
+                </app-button-primary>
+            </div>
+        </form>
+    </div>
+</div>

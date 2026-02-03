@@ -1,89 +1,201 @@
-<div class="app-container">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <img src="assets/espe-logo.png" alt="ESPE Logo" class="logo-small" onerror="this.style.display='none'">
-      <h4 class="sidebar-title">
-        <i class="bi bi-diagram-3-fill"></i>
-        Sistema de Gestión Integrado
-      </h4>
-      <p class="sidebar-subtitle">SGI-ESPE</p>
+<div class="min-h-screen bg-gray-50">
+  <!-- Sidebar Overlay (móvil) -->
+  <div *ngIf="sidebarVisible" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" (click)="toggleSidebar()">
+  </div>
+
+  <!-- Sidebar Navigation con estilo ESPE -->
+  <aside [class.translate-x-0]="sidebarVisible" [class.-translate-x-full]="!sidebarVisible"
+    class="fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-hidden">
+
+    <!-- Imagen de fondo -->
+    <div class="absolute inset-0 opacity-90 pointer-events-none">
+      <img src="assets/espe-edificio.jpeg" alt="ESPE Background" class="w-full h-full object-cover"
+        onerror="this.style.display='none'">
     </div>
 
-    <nav class="sidebar-nav">
-      <div class="nav-section">
-        <div class="nav-section-title accordion-header" (click)="toggleInventarioProcesos()">
-          <span>INVENTARIO DE PROCESOS</span>
-          <i class="bi" [ngClass]="inventarioProcesosOpen ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+    <!-- Contenido del Sidebar -->
+    <div class="relative z-10 h-full flex flex-col">
+
+      <!-- Header con logo y título MENÚ -->
+      <div class="flex items-center justify-between p-5 border-b border-gray-200 bg-white bg-opacity-95">
+        <div class="flex items-center gap-3">
+          <img src="assets/espe-escudo.png" alt="ESPE Logo" class="h-10 w-auto" onerror="this.style.display='none'">
+          <h1 class="text-2xl font-bold text-gray-700 tracking-wide">MENÚ</h1>
+        </div>
+        <button (click)="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <i class="pi pi-times text-gray-600 text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="flex-1 overflow-y-auto custom-scrollbar bg-white bg-opacity-90 p-4">
+
+        <!-- MAIN -->
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-gray-500 tracking-wider mb-3 px-2">MAIN</h3>
+          <a routerLink="/dashboard" routerLinkActive="active-nav-item" class="nav-item" (click)="closeSidebar()">
+            <i class="pi pi-home text-gray-600"></i>
+            <span>Principal</span>
+          </a>
         </div>
 
-        <div class="accordion-content" [class.open]="inventarioProcesosOpen">
-          <a class="nav-item submenu-item" routerLink="/macroprocesos" routerLinkActive="active">
-            <i class="bi bi-diagram-3"></i>
+        <!-- INVENTARIO DE PROCESOS -->
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-gray-500 tracking-wider mb-3 px-2">INVENTARIO DE PROCESOS</h3>
+
+          <a routerLink="/macroprocesos" routerLinkActive="active-nav-item" class="nav-item" (click)="closeSidebar()">
+            <i class="pi pi-sitemap text-gray-600"></i>
             <span>Macroprocesos</span>
           </a>
 
-          <a class="nav-item submenu-item" routerLink="/procesos" routerLinkActive="active">
-            <i class="bi bi-diagram-2"></i>
+          <a routerLink="/procesos" routerLinkActive="active-nav-item" class="nav-item" (click)="closeSidebar()">
+            <i class="pi pi-th-large text-gray-600"></i>
             <span>Procesos</span>
           </a>
 
-          <a class="nav-item submenu-item" routerLink="/subprocesos" routerLinkActive="active">
-            <i class="bi bi-diagram-2"></i>
+          <a routerLink="/subprocesos" routerLinkActive="active-nav-item" class="nav-item" (click)="closeSidebar()">
+            <i class="pi pi-bars text-gray-600"></i>
             <span>Subprocesos</span>
           </a>
         </div>
-      </div>
-      <!-- tambien hacer expacion para la lista infomada documentada de -->
 
-     <!-- <div class="nav-section">
+        <!-- LISTA INFORMACIÓN DOCUMENTADA -->
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-gray-500 tracking-wider mb-3 px-2">INFORMACIÓN DOCUMENTADA</h3>
 
-        <h6 class="nav-section-title">LISTA INFORMACION DOCUMENTADA</h6>
-      </div> -->
-      <div class="nav-section">
-        <div class="nav-section-title accordion-header" (click)="toggleListaInformacionDocumentada()">
-          <span>LISTA INFORMACION DOCUMENTADA</span>
-          <i class="bi" [ngClass]="listaInformacionDocumentadaOpen ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+          <a routerLink="/documentos" routerLinkActive="active-nav-item" class="nav-item" (click)="closeSidebar()">
+            <i class="pi pi-file-edit text-gray-600"></i>
+            <span>Documentos Normativos</span>
+          </a>
+
+          <a routerLink="/registros" routerLinkActive="active-nav-item" class="nav-item" (click)="closeSidebar()">
+            <i class="pi pi-database text-gray-600"></i>
+            <span>Registros</span>
+          </a>
+        </div>
+
+        <!-- REPORTES -->
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-gray-500 tracking-wider mb-3 px-2">REPORTES</h3>
+
+          <a routerLink="/reportes/procesos" routerLinkActive="active-nav-item" class="nav-item"
+            (click)="closeSidebar()">
+            <i class="pi pi-chart-pie text-gray-600"></i>
+            <span>Reporte de Procesos</span>
+          </a>
+
+          <a routerLink="/reportes/documentos" routerLinkActive="active-nav-item" class="nav-item"
+            (click)="closeSidebar()">
+            <i class="pi pi-file-pdf text-gray-600"></i>
+            <span>Reporte de Documentos</span>
+          </a>
+        </div>
+
+        <!-- CONFIGURACIÓN -->
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-gray-500 tracking-wider mb-3 px-2">CONFIGURACIÓN</h3>
+
+          <a routerLink="/configuracion-objetivos" routerLinkActive="active-nav-item" class="nav-item"
+            (click)="closeSidebar()">
+            <i class="pi pi-cog text-gray-600"></i>
+            <span>Configuración General</span>
+          </a>
+
+          <a routerLink="/usuarios" routerLinkActive="active-nav-item" class="nav-item" (click)="closeSidebar()">
+            <i class="pi pi-users text-gray-600"></i>
+            <span>Usuarios</span>
+          </a>
+        </div>
+      </nav>
+
+      <!-- Footer del Sidebar -->
+      <div class="p-4 bg-white bg-opacity-95 border-t border-gray-200">
+        <div class="text-center text-xs text-gray-500">
+          <p class="font-semibold">SGI-ESPE</p>
+          <p>© {{ currentYear }} ESPE</p>
+          <p class="text-gray-400">v1.0.0</p>
+        </div>
       </div>
-      </div>
-   </nav>
+    </div>
   </aside>
 
-  <!-- Main Content -->
-  <main class="main-content">
+  <!-- Main Content Area -->
+  <div class="transition-all duration-300 ease-in-out" [class.ml-80]="sidebarVisible" [class.ml-0]="!sidebarVisible">
+
     <!-- Top Header -->
-    <header class="top-header">
-      <div class="header-left">
-        <button class="menu-toggle" (click)="toggleSidebar()">
-          <i class="bi bi-list"></i>
-        </button>
-      </div>
-      <div class="header-right">
-        <span class="user-name">CACHIGUANGO, DENILSON</span>
-        <div class="user-avatar">
-          <i class="bi bi-person-circle"></i>
+    <header class="sticky top-0 z-30 bg-white shadow-md border-b border-gray-200">
+      <div class="flex items-center justify-between px-4 py-3 lg:px-6">
+
+        <!-- Left Section -->
+        <div class="flex items-center gap-4">
+          <button (click)="toggleSidebar()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+            <i class="pi pi-bars text-xl text-gray-700"></i>
+          </button>
+
+          <div class="hidden md:block">
+            <h1 class="text-xl font-bold text-gray-800">
+              Sistema de Gestión Integrado
+            </h1>
+            <p class="text-xs text-gray-500">Universidad de las Fuerzas Armadas ESPE</p>
+          </div>
+        </div>
+
+        <!-- Right Section -->
+        <div class="flex items-center gap-4">
+          <!-- Notifications -->
+          <p-button type="button" icon="pi pi-bell" styleClass="p-button-rounded p-button-text p-button-plain"
+            [badge]="'3'" badgeClass="p-badge-danger" pRipple>
+          </p-button>
+
+          <!-- User Menu -->
+          <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
+            <div class="hidden lg:block text-right">
+              <p class="text-sm font-semibold text-gray-800">Denilson Cachiguango</p>
+              <p class="text-xs text-gray-500">Administrador</p>
+            </div>
+            <button pButton pRipple type="button" class="p-button-rounded p-button-text"
+              style="width: 2.5rem; height: 2.5rem;">
+              <i class="pi pi-user text-lg"></i>
+            </button>
+          </div>
         </div>
       </div>
     </header>
 
     <!-- Page Content -->
-    <div class="content-wrapper">
+    <main class="min-h-[calc(100vh-64px-80px)] p-4 lg:p-6">
       <router-outlet></router-outlet>
-    </div>
+    </main>
 
-    <footer class="main-footer">
-      <div class="footer-content">
-        <div class="footer-left">
-          <img src="assets/espe-logo.png" alt="ESPE" class="footer-logo" onerror="this.style.display='none'">
-          <div class="footer-text">
-            <p class="mb-0"><strong>Universidad de las Fuerzas Armadas ESPE</strong> 2025</p>
-            <small>© Todos los derechos reservados.</small>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+      <div class="px-4 py-4 lg:px-6">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+
+          <!-- Left Section -->
+          <div class="flex items-center gap-4">
+            <img src="assets/espe-escudo.png" alt="ESPE Logo" class="h-12 w-auto" onerror="this.style.display='none'">
+            <div class="text-center md:text-left">
+              <p class="text-sm font-semibold text-gray-800">
+                Universidad de las Fuerzas Armadas ESPE
+              </p>
+              <p class="text-xs text-gray-500">
+                © {{ currentYear }} Todos los derechos reservados
+              </p>
+            </div>
           </div>
-        </div>
-        <div class="footer-right">
-          <small>Versión: 1.0.1</small>
+
+          <!-- Right Section -->
+          <div class="text-center md:text-right">
+            <p class="text-xs text-gray-500">
+              Desarrollado por UPDI
+            </p>
+            <p class="text-xs text-gray-400">
+              Versión 1.0.0 - Build {{ currentYear }}
+            </p>
+          </div>
         </div>
       </div>
     </footer>
-  </main>
+  </div>
 </div>

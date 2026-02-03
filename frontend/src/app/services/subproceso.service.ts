@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { 
-  Subproceso, 
-  SubprocesoRequest, 
-  EstadoDocumentacion 
+import {
+  Subproceso,
+  SubprocesoRequest,
+  EstadoDocumentacion
 } from '../models/inventario.model';
 import { environment } from '../../environments/environment';
 

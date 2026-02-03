@@ -1,11 +1,13 @@
 package ec.edu.espe.inventario.config;
 
 import ec.edu.espe.inventario.model.entity.Macroproceso;
+import ec.edu.espe.inventario.model.entity.ObjetivoEspecifico;
 import ec.edu.espe.inventario.model.entity.Proceso;
 import ec.edu.espe.inventario.model.entity.Subproceso;
 import ec.edu.espe.inventario.model.enums.EstadoDocumentacion;
 import ec.edu.espe.inventario.model.enums.TipoMacroproceso;
 import ec.edu.espe.inventario.repository.MacroprocesoRepository;
+import ec.edu.espe.inventario.repository.ObjetivoEspecificoRepository;
 import ec.edu.espe.inventario.repository.ProcesoRepository;
 import ec.edu.espe.inventario.repository.SubprocesoRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +22,21 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializer implements CommandLineRunner {
-    
+
     private final MacroprocesoRepository macroprocesoRepository;
     private final ProcesoRepository procesoRepository;
     private final SubprocesoRepository subprocesoRepository;
-    
+    private final ObjetivoEspecificoRepository objetivoEspecificoRepository;
+
     @Override
     public void run(String... args) {
         log.info("Iniciando carga de datos de prueba...");
-        
+
+        if (objetivoEspecificoRepository.count() == 0) {
+            cargarObjetivosEspecificos();
+            log.info("Objetivos especificos cargados exitosamente");
+        }
+
         if (macroprocesoRepository.count() == 0) {
             cargarDatosPrueba();
             log.info("Datos de prueba cargados exitosamente");
@@ -261,5 +269,46 @@ public class DataInitializer implements CommandLineRunner {
         sp.setActualizadoPor("admin");
         sp.setPorcentajeAvance(estado.getPorcentajeAsociado());
         return subprocesoRepository.save(sp);
+    }
+
+    private void cargarObjetivosEspecificos() {
+        crearObjetivoEspecifico(
+            "Excelencia Academica",
+            "Garantizar la calidad y pertinencia de la formacion academica mediante programas actualizados"
+        );
+
+        crearObjetivoEspecifico(
+            "Investigacion e Innovacion",
+            "Promover la investigacion cientifica y tecnologica que contribuya al desarrollo nacional"
+        );
+
+        crearObjetivoEspecifico(
+            "Vinculacion con la Sociedad",
+            "Fortalecer los vinculos con la comunidad mediante proyectos de extension y servicio social"
+        );
+
+        crearObjetivoEspecifico(
+            "Gestion Institucional Eficiente",
+            "Optimizar los procesos administrativos para una gestion transparente y eficaz"
+        );
+
+        crearObjetivoEspecifico(
+            "Desarrollo Tecnologico",
+            "Implementar soluciones tecnologicas que mejoren los servicios institucionales"
+        );
+
+        crearObjetivoEspecifico(
+            "Bienestar Universitario",
+            "Promover el desarrollo integral de la comunidad universitaria"
+        );
+    }
+
+    private ObjetivoEspecifico crearObjetivoEspecifico(String nombre, String descripcion) {
+        ObjetivoEspecifico objetivo = new ObjetivoEspecifico();
+        objetivo.setNombre(nombre);
+        objetivo.setDescripcion(descripcion);
+        objetivo.setCreadoPor("admin");
+        objetivo.setActualizadoPor("admin");
+        return objetivoEspecificoRepository.save(objetivo);
     }
 }

@@ -95,3 +95,18 @@ export interface SubprocesoRequest {
   descripcion: string;
   estadoDocumentacion?: EstadoDocumentacion;
 }
+
+export interface ObjetivoEspecifico {
+  id?: number;
+  nombre: string;
+  descripcion: string;
+  fechaCreacion?: string;
+  fechaActualizacion?: string;
+  creadoPor?: string;
+  actualizadoPor?: string;
+}
+
+export interface ObjetivoEspecificoRequest {
+  nombre: string;
+  descripcion: string;
+}

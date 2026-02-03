@@ -1,0 +1,130 @@
+<div class="registros-container">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+
+    <!-- Loading Spinner -->
+    <app-loading-spinner *ngIf="cargando"></app-loading-spinner>
+
+    <!-- Sección Matriz -->
+    <app-panel header="MATRIZ" [toggleable]="true" [collapsed]="false" class="sede-panel matriz-panel">
+
+        <app-data-table [value]="documentosMatriz" [columns]="columnas"
+            [globalFilterFields]="['unidad', 'solicitadoPor', 'nombreDocumento', 'tipoDocumento', 'codigoDocumento']"
+            [showPaginator]="true" [rows]="10" styleClass="matriz-table" [showActions]="true">
+
+            <ng-template #body let-documento>
+                <tr>
+                    <td *ngFor="let col of columnas">
+                        <ng-container [ngSwitch]="col.field">
+                            <ng-container *ngSwitchCase="'fechaSolicitud'">
+                                {{ formatearFecha(documento[col.field]) }}
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'fechaProtocolo'">
+                                {{ formatearFecha(documento[col.field]) }}
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'fechaEliminacion'">
+                                {{ formatearFecha(documento[col.field]) }}
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'enlaceArchivo'">
+                                <a *ngIf="documento[col.field]" [href]="documento[col.field]" target="_blank"
+                                    class="link-archivo">
+                                    <i class="pi pi-external-link"></i> Ver
+                                </a>
+                                <span *ngIf="!documento[col.field]">N/A</span>
+                            </ng-container>
+                            <ng-container *ngSwitchDefault>
+                                {{ documento[col.field] || 'N/A' }}
+                            </ng-container>
+                        </ng-container>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button pButton type="button" icon="pi pi-trash"
+                                class="p-button-rounded p-button-danger p-button-text"
+                                (click)="confirmarEliminar(documento)" pTooltip="Eliminar" tooltipPosition="top">
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </app-data-table>
+    </app-panel>
+
+    <!-- Sección Latacunga -->
+    <app-panel header="LATACUNGA" [toggleable]="true" [collapsed]="true" class="sede-panel latacunga-panel">
+
+        <app-data-table [value]="documentosLatacunga" [columns]="columnas"
+            [globalFilterFields]="['unidad', 'solicitadoPor', 'nombreDocumento', 'tipoDocumento', 'codigoDocumento']"
+            [showPaginator]="true" [rows]="10" styleClass="latacunga-table" [showActions]="true">
+
+            <ng-template #body let-documento>
+                <tr>
+                    <td *ngFor="let col of columnas">
+                        <ng-container [ngSwitch]="col.field">
+                            <ng-container *ngSwitchCase="'fechaSolicitud'">
+                                {{ formatearFecha(documento[col.field]) }}
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'enlaceArchivo'">
+                                <a *ngIf="documento[col.field]" [href]="documento[col.field]" target="_blank"
+                                    class="link-archivo">
+                                    <i class="pi pi-external-link"></i> Ver
+                                </a>
+                                <span *ngIf="!documento[col.field]">N/A</span>
+                            </ng-container>
+                            <ng-container *ngSwitchDefault>
+                                {{ documento[col.field] || 'N/A' }}
+                            </ng-container>
+                        </ng-container>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button pButton type="button" icon="pi pi-trash"
+                                class="p-button-rounded p-button-danger p-button-text"
+                                (click)="confirmarEliminar(documento)">
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </app-data-table>
+    </app-panel>
+
+    <!-- Sección Santo Domingo -->
+    <app-panel header="SANTO DOMINGO" [toggleable]="true" [collapsed]="true" class="sede-panel santo-domingo-panel">
+
+        <app-data-table [value]="documentosSantoDomingo" [columns]="columnas"
+            [globalFilterFields]="['unidad', 'solicitadoPor', 'nombreDocumento', 'tipoDocumento', 'codigoDocumento']"
+            [showPaginator]="true" [rows]="10" styleClass="santo-domingo-table" [showActions]="true">
+
+            <ng-template #body let-documento>
+                <tr>
+                    <td *ngFor="let col of columnas">
+                        <ng-container [ngSwitch]="col.field">
+                            <ng-container *ngSwitchCase="'fechaSolicitud'">
+                                {{ formatearFecha(documento[col.field]) }}
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'enlaceArchivo'">
+                                <a *ngIf="documento[col.field]" [href]="documento[col.field]" target="_blank"
+                                    class="link-archivo">
+                                    <i class="pi pi-external-link"></i> Ver
+                                </a>
+                                <span *ngIf="!documento[col.field]">N/A</span>
+                            </ng-container>
+                            <ng-container *ngSwitchDefault>
+                                {{ documento[col.field] || 'N/A' }}
+                            </ng-container>
+                        </ng-container>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button pButton type="button" icon="pi pi-trash"
+                                class="p-button-rounded p-button-danger p-button-text"
+                                (click)="confirmarEliminar(documento)">
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </app-data-table>
+    </app-panel>
+</div>

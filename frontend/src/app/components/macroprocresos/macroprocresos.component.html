@@ -1,0 +1,222 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Toast y ConfirmDialog -->
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+
+    <!-- Panel Principal -->
+    <app-panel header="Gestión de Macroprocesos" styleClass="shadow-xl rounded-xl border border-gray-200">
+        <ng-template #icons>
+            <app-button-add label="Nuevo Macroproceso" icon="pi pi-plus" tooltip="Agregar nuevo macroproceso"
+                [customStyle]="{
+          'box-shadow': '0 4px 15px 0 rgba(102, 126, 234, 0.4)'
+        }" (onClick)="nuevoMacroproceso()">
+            </app-button-add>
+        </ng-template>
+
+        <!-- Formulario Expandible -->
+        <div *ngIf="mostrarFormulario" class="mb-6 animate__animated animate__fadeIn">
+            <p-card [header]="modoEdicion ? 'Editar Macroproceso' : 'Nuevo Macroproceso'"
+                styleClass="border-l-4 border-indigo-500 shadow-lg">
+                <form (ngSubmit)="guardar()" #formMacroproceso="ngForm" class="space-y-6">
+
+                    <!-- Fila 1: Código y Tipo -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="unidadEstrategica"
+                                class="block text-sm font-bold text-gray-700 flex items-center">
+                                <i class="pi pi-hashtag mr-2 text-indigo-600"></i>
+                                Código de Macroproceso
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <app-input-text id="unidadEstrategica" name="unidadEstrategica"
+                                [(ngModel)]="formulario.unidadEstrategica" [required]="true"
+                                placeholder="Ej: VDC, UTIC, VAD" styleClass="w-full">
+                            </app-input-text>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label for="tipo" class="block text-sm font-bold text-gray-700 flex items-center">
+                                <i class="pi pi-sitemap mr-2 text-indigo-600"></i>
+                                Unidad Estratégica
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <app-dropdown [options]="tiposOptions" optionLabel="label" optionValue="value"
+                                [(ngModel)]="formulario.tipo" name="tipo" placeholder="Seleccione tipo"
+                                styleClass="w-full">
+                            </app-dropdown>
+                        </div>
+                    </div>
+
+                    <!-- Fila 2: Nombre -->
+                    <div class="space-y-2">
+                        <label for="nombre" class="block text-sm font-bold text-gray-700 flex items-center">
+                            <i class="pi pi-bookmark mr-2 text-indigo-600"></i>
+                            Nombre del Macroproceso
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <app-input-text id="nombre" name="nombre" [(ngModel)]="formulario.nombre" [required]="true"
+                            placeholder="Ingrese el nombre del macroproceso" styleClass="w-full">
+                        </app-input-text>
+                    </div>
+
+                    <!-- Fila 3: Descripción -->
+                    <div class="space-y-2">
+                        <label for="descripcion" class="block text-sm font-bold text-gray-700 flex items-center">
+                            <i class="pi pi-align-left mr-2 text-indigo-600"></i>
+                            Descripción
+                        </label>
+                        <app-textarea id="descripcion" name="descripcion" [(ngModel)]="formulario.descripcion"
+                            [rows]="4" placeholder="Describa brevemente el macroproceso..." styleClass="w-full">
+                        </app-textarea>
+                    </div>
+
+                    <!-- Fila 4: Responsable y Estado -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="responsablePrincipal"
+                                class="block text-sm font-bold text-gray-700 flex items-center">
+                                <i class="pi pi-user mr-2 text-indigo-600"></i>
+                                Responsable Principal
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <app-input-text id="responsablePrincipal" name="responsablePrincipal"
+                                [(ngModel)]="formulario.responsablePrincipal" [required]="true"
+                                placeholder="Nombre del responsable" styleClass="w-full">
+                            </app-input-text>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label for="estadoDocumentacion"
+                                class="block text-sm font-bold text-gray-700 flex items-center">
+                                <i class="pi pi-file-edit mr-2 text-indigo-600"></i>
+                                Estado de Documentación
+                            </label>
+                            <app-dropdown [options]="estadosOptions" optionLabel="label" optionValue="value"
+                                [(ngModel)]="formulario.estadoDocumentacion" name="estadoDocumentacion"
+                                placeholder="Seleccione estado" styleClass="w-full">
+                            </app-dropdown>
+                        </div>
+                    </div>
+
+                    <!-- Fila 5: Objetivos Estratégicos -->
+                    <div class="space-y-2">
+                        <label for="objetivosEstrategicos"
+                            class="block text-sm font-bold text-gray-700 flex items-center">
+                            <i class="pi pi-flag mr-2 text-indigo-600"></i>
+                            Objetivos Estratégicos
+                        </label>
+                        <app-dropdown [options]="objetivosOptions" optionLabel="label" optionValue="value"
+                            [(ngModel)]="formulario.objetivosEstrategicos" name="objetivosEstrategicos"
+                            placeholder="Seleccione un objetivo específico" styleClass="w-full">
+                        </app-dropdown>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                        <app-button-cancel label="Cancelar" icon="pi pi-times" [disabled]="cargando"
+                            (onClick)="cancelar()">
+                        </app-button-cancel>
+                        <app-button-primary type="submit" [label]="modoEdicion ? 'Actualizar' : 'Guardar'"
+                            [icon]="cargando ? 'pi pi-spin pi-spinner' : 'pi pi-save'"
+                            [disabled]="!formMacroproceso.valid || cargando" [loading]="cargando">
+                        </app-button-primary>
+                    </div>
+                </form>
+            </p-card>
+        </div>
+
+        <!-- Toggle de Columnas -->
+        <div class="mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-200 column-toggle">
+            <div class="flex items-center gap-3">
+                <i class="pi pi-table text-indigo-600 text-xl"></i>
+                <label class="font-semibold text-gray-700">Columnas visibles:</label>
+                <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
+                    selectedItemsLabel="{0} columnas seleccionadas" placeholder="Seleccionar columnas"
+                    [maxSelectedLabels]="3" styleClass="w-full md:w-80" [style]="{'min-width': '20rem'}">
+                </p-multiSelect>
+            </div>
+        </div>
+
+        <!-- Tabla de Datos -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <app-data-table [value]="macroprocesos" [columns]="selectedColumns" [showPaginator]="true" [rows]="10"
+                [rowsPerPageOptions]="[5, 10, 25, 50]"
+                [globalFilterFields]="['codigo', 'nombre', 'tipo', 'unidadEstrategica', 'responsablePrincipal']"
+                [colSpan]="selectedColumns.length + 1" emptyMessageTitle="No hay macroprocesos registrados"
+                emptyMessageSubtitle="Agregue un nuevo macroproceso para comenzar"
+                styleClass="p-datatable-striped p-datatable-gridlines" [sortField]="'nombre'" [sortOrder]="1"
+                sortMode="single" [showActions]="true">
+
+                <!-- Body de la tabla -->
+                <ng-template #body let-mp>
+                    <tr class="hover:bg-indigo-50 transition-colors duration-200">
+                        <td *ngIf="isColumnVisible('codigo')" class="text-center">
+                            <span class="font-mono font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full">
+                                {{ mp.codigo }}
+                            </span>
+                        </td>
+                        <td *ngIf="isColumnVisible('tipo')" class="text-center">
+                            <p-tag [value]="getTipoNombre(mp.tipo)" severity="info" styleClass="font-semibold">
+                            </p-tag>
+                        </td>
+                        <td *ngIf="isColumnVisible('nombre')" class="text-left">
+                            <div class="font-medium text-gray-800">{{ mp.nombre }}</div>
+                            <div *ngIf="mp.descripcion" class="text-xs text-gray-500 mt-1 line-clamp-2">
+                                {{ mp.descripcion }}
+                            </div>
+                        </td>
+                        <td *ngIf="isColumnVisible('unidadEstrategica')" class="text-center">
+                            <span class="text-gray-700">{{ mp.unidadEstrategica }}</span>
+                        </td>
+                        <td *ngIf="isColumnVisible('responsablePrincipal')" class="text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <i class="pi pi-user text-indigo-600"></i>
+                                <span class="text-gray-700">{{ mp.responsablePrincipal }}</span>
+                            </div>
+                        </td>
+                        <td *ngIf="isColumnVisible('estadoDocumentacion')" class="text-center">
+                            <p-tag [value]="getEstadoNombre(mp.estadoDocumentacion)"
+                                [severity]="getEstadoSeverity(mp.estadoDocumentacion)" styleClass="font-semibold">
+                            </p-tag>
+                        </td>
+                        <td *ngIf="isColumnVisible('porcentajeAvance')" class="text-center px-4">
+                            <div class="flex flex-col items-center gap-2">
+                                <p-progressBar [value]="mp.porcentajeAvance" [showValue]="true" [style]="{
+                                    'height': '24px',
+                                    'width': '100%',
+                                    'min-width': '120px'
+                                    }" [styleClass]="'rounded-full overflow-hidden'">
+                                </p-progressBar>
+                                <span class="text-xs font-semibold" [ngClass]="{
+                                        'text-red-600': mp.porcentajeAvance < 30,
+                                        'text-yellow-600': mp.porcentajeAvance >= 30 && mp.porcentajeAvance < 60,
+                                        'text-blue-600': mp.porcentajeAvance >= 60 && mp.porcentajeAvance < 90,
+                                        'text-green-600': mp.porcentajeAvance >= 90
+                                        }">
+                                    {{ mp.porcentajeAvance }}%
+                                </span>
+                            </div>
+                        </td>
+                        <td *ngIf="isColumnVisible('cantidadProcesos')" class="text-center">
+                            <p-tag [value]="(mp.cantidadProcesos || 0).toString()" severity="secondary"
+                                styleClass="font-bold text-lg" [style]="{'min-width': '50px'}">
+                            </p-tag>
+                        </td>
+                        <td class="text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button pButton pRipple type="button" icon="pi pi-pencil"
+                                    class="p-button-rounded p-button-warning p-button-sm" pTooltip="Editar"
+                                    tooltipPosition="top" (click)="editarMacroproceso(mp)">
+                                </button>
+                                <button pButton pRipple type="button" icon="pi pi-trash"
+                                    class="p-button-rounded p-button-danger p-button-sm" pTooltip="Eliminar"
+                                    tooltipPosition="top" (click)="eliminar(mp)">
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </app-data-table>
+        </div>
+    </app-panel>
+</div>

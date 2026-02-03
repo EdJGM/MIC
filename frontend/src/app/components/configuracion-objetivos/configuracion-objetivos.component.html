@@ -1,0 +1,107 @@
+<div class="p-4">
+  <div class="w-full">
+    <app-panel header="Definir Objetivos Especificos">
+      <ng-template #icons>
+        <app-button-add
+          tooltip="Nuevo Objetivo Especifico"
+          (onClick)="nuevoObjetivo()">
+        </app-button-add>
+      </ng-template>
+
+      <!-- Formulario Desglosable -->
+      <div *ngIf="mostrarFormulario" class="mb-4">
+        <p-card [header]="modoEdicion ? 'Editar Objetivo Especifico' : 'Nuevo Objetivo Especifico'"
+                styleClass="p-card-form p-4">
+          <form (ngSubmit)="guardar()" #formObjetivo="ngForm">
+            <div class="grid grid-cols-12 gap-4">
+              <div class="col-span-12">
+                <label for="nombre" class="block font-medium mb-2">Nombre *</label>
+                <app-input-text
+                  id="nombre"
+                  name="nombre"
+                  [(ngModel)]="formulario.nombre"
+                  [required]="true"
+                  placeholder="Ingrese el nombre del objetivo especifico">
+                </app-input-text>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-4 mt-3">
+              <div class="col-span-12">
+                <label for="descripcion" class="block font-medium mb-2">Descripcion</label>
+                <app-textarea
+                  id="descripcion"
+                  name="descripcion"
+                  [(ngModel)]="formulario.descripcion"
+                  [rows]="3"
+                  placeholder="Describa el objetivo especifico">
+                </app-textarea>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4">
+              <app-button-cancel
+                (onClick)="cancelar()">
+              </app-button-cancel>
+              <app-button-primary
+                type="submit"
+                [label]="modoEdicion ? 'Actualizar' : 'Guardar'"
+                icon="pi pi-save"
+                [disabled]="!formObjetivo.valid">
+              </app-button-primary>
+            </div>
+          </form>
+        </p-card>
+      </div>
+
+      <!-- Tabla con wrapper -->
+      <app-data-table
+        [value]="objetivos"
+        [showPaginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 25, 50]"
+        [globalFilterFields]="['nombre', 'descripcion']"
+        [colSpan]="3"
+        emptyMessageTitle="No hay objetivos especificos registrados"
+        emptyMessageSubtitle="Agregue un nuevo objetivo para comenzar">
+
+        <ng-template #header>
+          <tr>
+            <th pSortableColumn="nombre" style="min-width: 200px">
+              Nombre <p-sortIcon field="nombre"></p-sortIcon>
+            </th>
+            <th pSortableColumn="descripcion" style="min-width: 300px">
+              Descripcion <p-sortIcon field="descripcion"></p-sortIcon>
+            </th>
+            <th style="min-width: 120px; text-align: center">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-objetivo>
+          <tr>
+            <td>
+              <strong>{{ objetivo.nombre }}</strong>
+            </td>
+            <td>{{ objetivo.descripcion }}</td>
+            <td class="text-center">
+              <app-button-add
+                icon="pi pi-pencil"
+                tooltip="Editar"
+                size="small"
+                [customStyle]="{'background-color': '#ffc107', 'border-color': '#ffc107'}"
+                (onClick)="editarObjetivo(objetivo)">
+              </app-button-add>
+              <app-button-add
+                icon="pi pi-trash"
+                tooltip="Eliminar"
+                size="small"
+                [customStyle]="{'background-color': '#dc3545', 'border-color': '#dc3545', 'margin-left': '0.25rem'}"
+                (onClick)="eliminar(objetivo)">
+              </app-button-add>
+            </td>
+          </tr>
+        </ng-template>
+      </app-data-table>
+    </app-panel>
+  </div>
+</div>

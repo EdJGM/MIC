@@ -1,0 +1,38 @@
+.table-wrapper {
+  overflow-x: auto;
+}
+
+:host ::ng-deep .p-panel .p-panel-header {
+  background: linear-gradient(135deg, #1a7b4e 0%, #0d5c3a 100%);
+  color: white;
+  border-radius: 8px 8px 0 0;
+}
+
+:host ::ng-deep .p-panel .p-panel-content {
+  padding: 1.5rem;
+}
+
+:host ::ng-deep .p-card-form {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  background: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
+  background: rgba(26, 123, 78, 0.05);
+}
+
+:host ::ng-deep .p-button.p-button-success {
+  background: #1a7b4e;
+  border-color: #1a7b4e;
+}
+
+:host ::ng-deep .p-button.p-button-success:hover {
+  background: #0d5c3a;
+  border-color: #0d5c3a;
+}

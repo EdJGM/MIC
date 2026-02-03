@@ -1,0 +1,182 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+
+    <app-panel header="Gestión de Procesos" styleClass="shadow-xl rounded-xl border border-blue-200">
+        <ng-template #icons>
+            <app-button-add label="Nuevo Proceso" icon="pi pi-plus" tooltip="Agregar nuevo proceso" [customStyle]="{
+                    'box-shadow': '0 4px 15px 0 rgba(102, 126, 234, 0.4)'
+                }" (onClick)="nuevoProceso()">
+            </app-button-add>
+        </ng-template>
+
+        <!-- Formulario -->
+        <div *ngIf="mostrarFormulario" class="mb-6 animate__animated animate__fadeIn">
+            <p-card [header]="modoEdicion ? 'Editar Proceso' : 'Nuevo Proceso'"
+                styleClass="border-l-4 border-blue-500 shadow-lg">
+                <form (ngSubmit)="guardar()" #formProceso="ngForm" class="space-y-6">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Macroproceso -->
+                        <div class="space-y-2">
+                            <label for="macroprocesoId" class="block text-sm font-bold text-gray-700 flex items-center">
+                                <i class="pi pi-sitemap mr-2 text-blue-600"></i>
+                                Macroproceso
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <app-dropdown [options]="macroprocesosOptions" optionLabel="label" optionValue="value"
+                                [(ngModel)]="formulario.macroprocesoId" name="macroprocesoId"
+                                placeholder="Seleccione macroproceso" styleClass="w-full" [required]="true">
+                            </app-dropdown>
+                        </div>
+
+                        <!-- Estado -->
+                        <div class="space-y-2">
+                            <label for="estadoDocumentacion"
+                                class="block text-sm font-bold text-gray-700 flex items-center">
+                                <i class="pi pi-file-edit mr-2 text-blue-600"></i>
+                                Estado de Documentación
+                            </label>
+                            <app-dropdown [options]="estadosOptions" optionLabel="label" optionValue="value"
+                                [(ngModel)]="formulario.estadoDocumentacion" name="estadoDocumentacion"
+                                placeholder="Seleccione estado" styleClass="w-full">
+                            </app-dropdown>
+                        </div>
+                    </div>
+
+                    <!-- Nombre -->
+                    <div class="space-y-2">
+                        <label for="nombre" class="block text-sm font-bold text-gray-700 flex items-center">
+                            <i class="pi pi-bookmark mr-2 text-blue-600"></i>
+                            Nombre del Proceso
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <app-input-text id="nombre" name="nombre" [(ngModel)]="formulario.nombre" [required]="true"
+                            placeholder="Ingrese el nombre del proceso" styleClass="w-full">
+                        </app-input-text>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="space-y-2">
+                        <label for="descripcion" class="block text-sm font-bold text-gray-700 flex items-center">
+                            <i class="pi pi-align-left mr-2 text-blue-600"></i>
+                            Descripción
+                        </label>
+                        <app-textarea id="descripcion" name="descripcion" [(ngModel)]="formulario.descripcion"
+                            [rows]="4" placeholder="Describa el proceso..." styleClass="w-full">
+                        </app-textarea>
+                    </div>
+
+                    <!-- Responsable -->
+                    <div class="space-y-2">
+                        <label for="responsable" class="block text-sm font-bold text-gray-700 flex items-center">
+                            <i class="pi pi-user mr-2 text-blue-600"></i>
+                            Responsable
+                        </label>
+                        <app-input-text id="responsable" name="responsable" [(ngModel)]="formulario.responsable"
+                            placeholder="Nombre del responsable" styleClass="w-full">
+                        </app-input-text>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                        <app-button-cancel label="Cancelar" icon="pi pi-times" [disabled]="cargando"
+                            (onClick)="cancelar()">
+                        </app-button-cancel>
+                        <app-button-primary type="submit" [label]="modoEdicion ? 'Actualizar' : 'Guardar'"
+                            [icon]="cargando ? 'pi pi-spin pi-spinner' : 'pi pi-save'"
+                            [disabled]="!formProceso.valid || cargando" [loading]="cargando">
+                        </app-button-primary>
+                    </div>
+                </form>
+            </p-card>
+        </div>
+
+        <!-- Toggle de Columnas -->
+        <div class="mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-200 column-toggle">
+            <div class="flex items-center gap-3">
+                <i class="pi pi-table text-indigo-600 text-xl"></i>
+                <label class="font-semibold text-gray-700">Columnas visibles:</label>
+                <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
+                    selectedItemsLabel="{0} columnas seleccionadas" placeholder="Seleccionar columnas"
+                    [maxSelectedLabels]="3" styleClass="w-full md:w-80" [style]="{'min-width': '20rem'}">
+                </p-multiSelect>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <app-data-table [value]="procesos" [columns]="selectedColumns" [showPaginator]="true" [rows]="10"
+                [rowsPerPageOptions]="[5, 10, 25, 50]"
+                [globalFilterFields]="['codigo', 'nombre', 'macroprocesoNombre', 'responsable']" [loading]="cargando"
+                [sortMode]="'multiple'" [colSpan]="selectedColumns.length + 1"
+                emptyMessageTitle="No hay procesos registrados"
+                emptyMessageSubtitle="Agregue un nuevo proceso para comenzar"
+                styleClass="p-datatable-striped p-datatable-gridlines" [showActions]="true">
+
+                <ng-template #body let-proc>
+                    <tr class="hover:bg-blue-50 transition-colors duration-200">
+                        <td *ngIf="isColumnVisible('codigo')" class="text-center">
+                            <span class="font-mono font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">
+                                {{ proc.codigo }}
+                            </span>
+                        </td>
+                        <td *ngIf="isColumnVisible('nombre')" class="text-left">
+                            <div class="font-medium text-gray-800">{{ proc.nombre }}</div>
+                            <div *ngIf="proc.descripcion" class="text-xs text-gray-500 mt-1 line-clamp-2">
+                                {{ proc.descripcion }}
+                            </div>
+                        </td>
+                        <td *ngIf="isColumnVisible('macroprocesoNombre')" class="text-center">
+                            <p-tag [value]="proc.macroprocesoNombre" severity="info" styleClass="font-semibold">
+                            </p-tag>
+                        </td>
+                        <td *ngIf="isColumnVisible('responsable')" class="text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <i class="pi pi-user text-blue-600"></i>
+                                <span class="text-gray-700">{{ proc.responsable || 'N/A' }}</span>
+                            </div>
+                        </td>
+                        <td *ngIf="isColumnVisible('estadoDocumentacion')" class="text-center">
+                            <p-tag [value]="getEstadoNombre(proc.estadoDocumentacion)"
+                                [severity]="getEstadoSeverity(proc.estadoDocumentacion)" styleClass="font-semibold">
+                            </p-tag>
+                        </td>
+                        <td *ngIf="isColumnVisible('porcentajeAvance')" class="text-center px-4">
+                            <div class="flex flex-col items-center gap-2">
+                                <p-progressBar [value]="proc.porcentajeAvance" [showValue]="true"
+                                    [style]="{'height': '24px', 'width': '100%', 'min-width': '120px'}">
+                                </p-progressBar>
+                                <span class="text-xs font-semibold" [ngClass]="{
+                        'text-red-600': proc.porcentajeAvance < 30,
+                        'text-yellow-600': proc.porcentajeAvance >= 30 && proc.porcentajeAvance < 60,
+                        'text-blue-600': proc.porcentajeAvance >= 60 && proc.porcentajeAvance < 90,
+                        'text-green-600': proc.porcentajeAvance >= 90
+                      }">
+                                    {{ proc.porcentajeAvance }}%
+                                </span>
+                            </div>
+                        </td>
+                        <td *ngIf="isColumnVisible('cantidadSubprocesos')" class="text-center">
+                            <p-tag [value]="(proc.cantidadSubprocesos || 0).toString()" severity="secondary"
+                                styleClass="font-bold text-lg">
+                            </p-tag>
+                        </td>
+                        <td class="text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button pButton pRipple type="button" icon="pi pi-pencil"
+                                    class="p-button-rounded p-button-warning p-button-sm" pTooltip="Editar"
+                                    tooltipPosition="top" (click)="editarProceso(proc)">
+                                </button>
+                                <button pButton pRipple type="button" icon="pi pi-trash"
+                                    class="p-button-rounded p-button-danger p-button-sm" pTooltip="Eliminar"
+                                    tooltipPosition="top" (click)="eliminar(proc)">
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </app-data-table>
+        </div>
+    </app-panel>
+</div>
