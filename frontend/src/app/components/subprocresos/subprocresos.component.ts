@@ -78,21 +78,29 @@ export class SubprocesosListComponent implements OnInit {
   estadosDocumentacion = Object.values(EstadoDocumentacion);
 
   // Options para dropdowns
-  estadosOptions: { label: string; value: string }[] = [];
-  procesosOptions: { label: string; value: number }[] = [];
+  estadosOptions:        { label: string; value: string }[] = [];
+  procesosN2Options:     { label: string; value: number }[] = [];
+  subprocesosN1Options:  { label: string; value: number }[] = [];
+  nivelesOptions:        { label: string; value: number }[] = [
+    { label: 'SP-N1 — Subproceso de primer nivel', value: 1 },
+    { label: 'SP-N2 — Subproceso de segundo nivel (hijo de SP-N1)', value: 2 }
+  ];
 
   // Column toggle
   cols: Column[] = [
-    { field: 'codigo', header: 'Código', sortable: true },
-    { field: 'nombre', header: 'Nombre', sortable: true },
-    { field: 'procesoNombre', header: 'Proceso', sortable: true },
-    { field: 'estadoDocumentacion', header: 'Estado', sortable: true },
-    { field: 'porcentajeAvance', header: 'Avance %', sortable: true },
-    { field: 'fechaCreacion', header: 'Fecha Creación', sortable: true }
+    { field: 'nivel',                 header: 'Nivel',           sortable: true },
+    { field: 'codigo',                header: 'Código',          sortable: true },
+    { field: 'nombre',                header: 'Nombre',          sortable: true },
+    { field: 'procesoNombre',         header: 'Proceso (N2)',    sortable: true },
+    { field: 'subprocesoPadreNombre', header: 'SP Padre (N1)',   sortable: true },
+    { field: 'estadoDocumentacion',   header: 'Estado',          sortable: true },
+    { field: 'porcentajeAvance',      header: 'Avance %',        sortable: true },
+    { field: 'cantidadHijos',         header: 'N° Hijos (SP-N2)', sortable: false }
   ];
-  selectedColumns: Column[] = [...this.cols];
+  selectedColumns: Column[] = this.cols.filter(c =>
+    ['nivel','codigo','nombre','procesoNombre','estadoDocumentacion','porcentajeAvance','cantidadHijos'].includes(c.field)
+  );
 
-  // Procesos para dropdown
   procesos: Proceso[] = [];
 
   constructor(
@@ -118,48 +126,63 @@ export class SubprocesosListComponent implements OnInit {
     this.cargando = true;
     Promise.all([
       this.cargarSubprocesos(),
-      this.cargarProcesos()
-    ]).finally(() => {
-      this.cargando = false;
-    });
+      this.cargarProcesosN2()
+    ]).finally(() => { this.cargando = false; });
   }
 
   cargarSubprocesos(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.subprocesoService.getAll().subscribe({
-        next: (data) => {
-          this.subprocesos = data;
-          resolve();
-        },
-        error: (error) => {
-          console.error('Error cargando subprocesos:', error);
-          this.mostrarError('Error al cargar los subprocesos');
-          reject(error);
-        }
+        next: (data) => { this.subprocesos = data; resolve(); },
+        error: (err) => { this.mostrarError('Error al cargar los subprocesos'); reject(err); }
       });
     });
   }
 
-  cargarProcesos(): Promise<void> {
+  cargarProcesosN2(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.procesoService.getAll().subscribe({
         next: (data) => {
           this.procesos = data;
-          this.procesosOptions = [
-            { label: 'Seleccione un proceso', value: 0 },
-            ...data.map(proc => ({
-              label: `${proc.codigo} - ${proc.nombre}`,
-              value: proc.id!
-            }))
+          const n2 = data.filter(p => p.nivel === 2);
+          this.procesosN2Options = [
+            { label: 'Seleccione un proceso N2', value: 0 },
+            ...n2.map(p => ({ label: `${p.codigo} - ${p.nombre}`, value: p.id! }))
           ];
           resolve();
         },
-        error: (error) => {
-          console.error('Error cargando procesos:', error);
-          this.mostrarError('Error al cargar los procesos');
-          reject(error);
-        }
+        error: (err) => { this.mostrarError('Error al cargar los procesos'); reject(err); }
       });
+    });
+  }
+
+  /** Cuando cambia el Proceso N2: recarga SP-N1 si estamos en nivel 2 */
+  onProcesoN2Change(procesoId: number): void {
+    this.formulario.subprocesoPadreId = undefined;
+    this.subprocesosN1Options = [];
+    if (this.formulario.nivel === 2 && procesoId && procesoId !== 0) {
+      this.cargarSubprocesosN1(procesoId);
+    }
+  }
+
+  /** Cuando cambia el nivel en el formulario */
+  onNivelChange(nivel: number): void {
+    this.formulario.subprocesoPadreId = undefined;
+    this.subprocesosN1Options = [];
+    if (nivel === 2 && this.formulario.procesoId && this.formulario.procesoId !== 0) {
+      this.cargarSubprocesosN1(this.formulario.procesoId);
+    }
+  }
+
+  private cargarSubprocesosN1(procesoId: number): void {
+    this.subprocesoService.getByProcesoYNivel(procesoId, 1).subscribe({
+      next: (data) => {
+        this.subprocesosN1Options = [
+          { label: 'Seleccione subproceso N1 padre', value: 0 },
+          ...data.map(sp => ({ label: `${sp.codigo} - ${sp.nombre}`, value: sp.id! }))
+        ];
+      },
+      error: () => this.mostrarError('Error al cargar los subprocesos N1')
     });
   }
 
@@ -167,6 +190,7 @@ export class SubprocesosListComponent implements OnInit {
     this.modoEdicion = false;
     this.mostrarFormulario = true;
     this.formulario = this.inicializarFormulario();
+    this.subprocesosN1Options = [];
     this.subprocesoSeleccionado = null;
   }
 
@@ -176,55 +200,55 @@ export class SubprocesosListComponent implements OnInit {
     this.subprocesoSeleccionado = subproceso;
     this.formulario = {
       procesoId: subproceso.procesoId,
+      nivel: subproceso.nivel,
+      subprocesoPadreId: subproceso.subprocesoPadreId,
       nombre: subproceso.nombre,
       descripcion: subproceso.descripcion,
       estadoDocumentacion: subproceso.estadoDocumentacion
     };
+    // Si es SP-N2, precargar opciones de subproceso padre
+    if (subproceso.nivel === 2 && subproceso.procesoId) {
+      this.cargarSubprocesosN1(subproceso.procesoId);
+    }
   }
 
   guardar(): void {
-    if (this.formulario.procesoId === 0) {
-      this.mostrarAdvertencia('Debe seleccionar un proceso');
+    if (!this.formulario.procesoId || this.formulario.procesoId === 0) {
+      this.mostrarAdvertencia('Debe seleccionar un Proceso N2');
+      return;
+    }
+    if (this.formulario.nivel === 2 && (!this.formulario.subprocesoPadreId || this.formulario.subprocesoPadreId === 0)) {
+      this.mostrarAdvertencia('Debe seleccionar el Subproceso N1 padre para un SP-N2');
       return;
     }
 
     this.cargando = true;
-    if (this.modoEdicion && this.subprocesoSeleccionado) {
-      this.subprocesoService.update(this.subprocesoSeleccionado.id!, this.formulario).subscribe({
-        next: () => {
-          this.mostrarExito('Subproceso actualizado exitosamente');
-          this.cargarSubprocesos();
-          this.cancelar();
-        },
-        error: (error) => {
-          console.error('Error actualizando subproceso:', error);
-          this.mostrarError('Error al actualizar el subproceso');
-        },
-        complete: () => {
-          this.cargando = false;
-        }
-      });
-    } else {
-      this.subprocesoService.create(this.formulario).subscribe({
-        next: () => {
-          this.mostrarExito('Subproceso creado exitosamente');
-          this.cargarSubprocesos();
-          this.cancelar();
-        },
-        error: (error) => {
-          console.error('Error creando subproceso:', error);
-          this.mostrarError('Error al crear el subproceso');
-        },
-        complete: () => {
-          this.cargando = false;
-        }
-      });
-    }
+    const op$ = this.modoEdicion && this.subprocesoSeleccionado
+      ? this.subprocesoService.update(this.subprocesoSeleccionado.id!, this.formulario)
+      : this.subprocesoService.create(this.formulario);
+
+    op$.subscribe({
+      next: () => {
+        this.mostrarExito(this.modoEdicion ? 'Subproceso actualizado exitosamente' : 'Subproceso creado exitosamente');
+        this.cargarSubprocesos();
+        this.cancelar();
+      },
+      error: (err) => {
+        const msg = err?.error?.message || (this.modoEdicion ? 'Error al actualizar' : 'Error al crear');
+        this.mostrarError(msg);
+        this.cargando = false;
+      },
+      complete: () => { this.cargando = false; }
+    });
   }
 
   eliminar(subproceso: Subproceso): void {
+    const aviso = subproceso.nivel === 1
+      ? `¿Eliminar el Subproceso SP-N1 "${subproceso.nombre}"? Se eliminarán sus SP-N2 asociados.`
+      : `¿Eliminar el Subproceso SP-N2 "${subproceso.nombre}"?`;
+
     this.confirmationService.confirm({
-      message: `¿Está seguro de eliminar el subproceso "${subproceso.nombre}"?`,
+      message: aviso,
       header: 'Confirmar Eliminación',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí, eliminar',
@@ -233,17 +257,13 @@ export class SubprocesosListComponent implements OnInit {
       accept: () => {
         this.cargando = true;
         this.subprocesoService.delete(subproceso.id!).subscribe({
-          next: () => {
-            this.mostrarExito('Subproceso eliminado exitosamente');
-            this.cargarSubprocesos();
-          },
-          error: (error) => {
-            console.error('Error eliminando subproceso:', error);
-            this.mostrarError('Error al eliminar el subproceso');
-          },
-          complete: () => {
+          next: () => { this.mostrarExito('Subproceso eliminado exitosamente'); this.cargarSubprocesos(); },
+          error: (err) => {
+            const msg = err?.error?.message || 'No se puede eliminar. Verifique dependencias.';
+            this.mostrarError(msg);
             this.cargando = false;
-          }
+          },
+          complete: () => { this.cargando = false; }
         });
       }
     });
@@ -253,86 +273,77 @@ export class SubprocesosListComponent implements OnInit {
     this.mostrarFormulario = false;
     this.modoEdicion = false;
     this.subprocesoSeleccionado = null;
+    this.subprocesosN1Options = [];
     this.formulario = this.inicializarFormulario();
   }
 
   private inicializarFormulario(): SubprocesoRequest {
     return {
       procesoId: 0,
+      nivel: 1,
+      subprocesoPadreId: undefined,
       nombre: '',
       descripcion: '',
       estadoDocumentacion: EstadoDocumentacion.NO_DOCUMENTADO
     };
   }
 
-  // Utilidades
-  getEstadoSeverity(estado: EstadoDocumentacion): "success" | "secondary" | "info" | "warning" | "danger" | "contrast" | undefined {
-    const severityMap: { [key in EstadoDocumentacion]: "success" | "secondary" | "info" | "warning" | "danger" | "contrast" } = {
-      [EstadoDocumentacion.NO_DOCUMENTADO]: 'secondary',
-      [EstadoDocumentacion.LEVANTAMIENTO]: 'info',
-      [EstadoDocumentacion.FLUJODIAGRAMACION]: 'info',
+  // ── Utilidades ────────────────────────────────────────────────────────────
+
+  getNivelLabel(nivel: number): string {
+    return nivel === 1 ? 'SP-N1' : 'SP-N2';
+  }
+
+  getNivelSeverity(nivel: number): 'info' | 'warning' {
+    return nivel === 1 ? 'info' : 'warning';
+  }
+
+  /** Para la columna "N° Hijos": SP-N1 muestra sus SP-N2; SP-N2 siempre 0 */
+  getCantidadHijos(sp: Subproceso): number {
+    return sp.nivel === 1 ? (sp.cantidadSubprocesosHijos ?? 0) : 0;
+  }
+
+  getEstadoSeverity(estado: EstadoDocumentacion): 'success' | 'secondary' | 'info' | 'warning' | 'danger' | 'contrast' | undefined {
+    const map: { [key in EstadoDocumentacion]: 'success' | 'secondary' | 'info' | 'warning' | 'danger' | 'contrast' } = {
+      [EstadoDocumentacion.NO_DOCUMENTADO]:  'secondary',
+      [EstadoDocumentacion.LEVANTAMIENTO]:   'info',
+      [EstadoDocumentacion.FLUJODIAGRAMACION]:'info',
       [EstadoDocumentacion.CARACTERIZACION]: 'warning',
-      [EstadoDocumentacion.VALIDACION]: 'warning',
-      [EstadoDocumentacion.LEGALIZADO]: 'success',
-      [EstadoDocumentacion.DIFUNDIDO]: 'success',
-      [EstadoDocumentacion.MEJORA]: 'contrast'
+      [EstadoDocumentacion.VALIDACION]:      'warning',
+      [EstadoDocumentacion.LEGALIZADO]:      'success',
+      [EstadoDocumentacion.DIFUNDIDO]:       'success',
+      [EstadoDocumentacion.MEJORA]:          'contrast'
     };
-    return severityMap[estado];
+    return map[estado];
   }
 
   getEstadoNombre(estado: EstadoDocumentacion): string {
-    const nombreMap: { [key in EstadoDocumentacion]: string } = {
-      [EstadoDocumentacion.NO_DOCUMENTADO]: 'No Documentado',
-      [EstadoDocumentacion.LEVANTAMIENTO]: 'Levantamiento',
-      [EstadoDocumentacion.FLUJODIAGRAMACION]: 'Flujodiagramación',
+    const map: { [key in EstadoDocumentacion]: string } = {
+      [EstadoDocumentacion.NO_DOCUMENTADO]:  'No Documentado',
+      [EstadoDocumentacion.LEVANTAMIENTO]:   'Levantamiento',
+      [EstadoDocumentacion.FLUJODIAGRAMACION]:'Flujodiagramación',
       [EstadoDocumentacion.CARACTERIZACION]: 'Caracterización',
-      [EstadoDocumentacion.VALIDACION]: 'Validación',
-      [EstadoDocumentacion.LEGALIZADO]: 'Legalizado',
-      [EstadoDocumentacion.DIFUNDIDO]: 'Difundido',
-      [EstadoDocumentacion.MEJORA]: 'Mejora Continua'
+      [EstadoDocumentacion.VALIDACION]:      'Validación',
+      [EstadoDocumentacion.LEGALIZADO]:      'Legalizado',
+      [EstadoDocumentacion.DIFUNDIDO]:       'Difundido',
+      [EstadoDocumentacion.MEJORA]:          'Mejora Continua'
     };
-    return nombreMap[estado];
-  }
-
-  formatFecha(fecha: string | undefined): string {
-    if (!fecha) return 'N/A';
-    const date = new Date(fecha);
-    return date.toLocaleDateString('es-EC', {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit'
-    });
+    return map[estado];
   }
 
   isColumnVisible(field: string): boolean {
     return this.selectedColumns.some(col => col.field === field);
   }
 
-  // Mensajes Toast
   private mostrarExito(mensaje: string): void {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Éxito',
-      detail: mensaje,
-      life: 3000
-    });
+    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: mensaje, life: 3000 });
   }
 
   private mostrarError(mensaje: string): void {
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: mensaje,
-      life: 5000
-    });
+    this.messageService.add({ severity: 'error', summary: 'Error', detail: mensaje, life: 5000 });
   }
 
   private mostrarAdvertencia(mensaje: string): void {
-    this.messageService.add({
-      severity: 'warn',
-      summary: 'Advertencia',
-      detail: mensaje,
-      life: 4000
-    });
+    this.messageService.add({ severity: 'warn', summary: 'Advertencia', detail: mensaje, life: 4000 });
   }
 }

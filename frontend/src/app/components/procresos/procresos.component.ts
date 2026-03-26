@@ -78,22 +78,29 @@ export class ProcesosListComponent implements OnInit {
   estadosDocumentacion = Object.values(EstadoDocumentacion);
 
   // Options para dropdowns
-  estadosOptions: { label: string; value: string }[] = [];
-  macroprocesosOptions: { label: string; value: number }[] = [];
+  estadosOptions:        { label: string; value: string }[] = [];
+  macroprocesosOptions:  { label: string; value: number }[] = [];
+  nivelesOptions:        { label: string; value: number }[] = [
+    { label: 'N1 — Proceso de primer nivel', value: 1 },
+    { label: 'N2 — Proceso de segundo nivel (hijo de N1)', value: 2 }
+  ];
+  procesosN1Options: { label: string; value: number }[] = [];
 
   // Column toggle
   cols: Column[] = [
-    { field: 'codigo', header: 'Código', sortable: true },
-    { field: 'nombre', header: 'Nombre', sortable: true },
+    { field: 'nivel',              header: 'Nivel',        sortable: true },
+    { field: 'codigo',             header: 'Código',       sortable: true },
+    { field: 'nombre',             header: 'Nombre',       sortable: true },
     { field: 'macroprocesoNombre', header: 'Macroproceso', sortable: true },
-    { field: 'responsable', header: 'Responsable', sortable: true },
-    { field: 'estadoDocumentacion', header: 'Estado', sortable: true },
-    { field: 'porcentajeAvance', header: 'Avance %', sortable: true },
-    { field: 'cantidadSubprocesos', header: 'N° Subprocesos', sortable: true }
+    { field: 'procesoPadreNombre', header: 'Proceso Padre (N1)', sortable: true },
+    { field: 'estadoDocumentacion',header: 'Estado',       sortable: true },
+    { field: 'porcentajeAvance',   header: 'Avance %',     sortable: true },
+    { field: 'cantidadHijos',      header: 'N° Hijos',     sortable: false }
   ];
-  selectedColumns: Column[] = [...this.cols];
+  selectedColumns: Column[] = this.cols.filter(c =>
+    ['nivel','codigo','nombre','macroprocesoNombre','estadoDocumentacion','porcentajeAvance','cantidadHijos'].includes(c.field)
+  );
 
-  // Macroprocesos para dropdown
   macroprocesos: Macroproceso[] = [];
 
   constructor(
@@ -120,22 +127,14 @@ export class ProcesosListComponent implements OnInit {
     Promise.all([
       this.cargarProcesos(),
       this.cargarMacroprocesos()
-    ]).finally(() => {
-      this.cargando = false;
-    });
+    ]).finally(() => { this.cargando = false; });
   }
 
   cargarProcesos(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.procesoService.getAll().subscribe({
-        next: (data) => {
-          this.procesos = data;
-          resolve();
-        },
-        error: (error) => {
-          this.mostrarError('Error al cargar los procesos');
-          reject(error);
-        }
+        next: (data) => { this.procesos = data; resolve(); },
+        error: (err) => { this.mostrarError('Error al cargar los procesos'); reject(err); }
       });
     });
   }
@@ -147,18 +146,42 @@ export class ProcesosListComponent implements OnInit {
           this.macroprocesos = data;
           this.macroprocesosOptions = [
             { label: 'Seleccione un macroproceso', value: 0 },
-            ...data.map(mp => ({
-              label: `${mp.codigo} - ${mp.nombre}`,
-              value: mp.id!
-            }))
+            ...data.map(mp => ({ label: `${mp.codigo} - ${mp.nombre}`, value: mp.id! }))
           ];
           resolve();
         },
-        error: (error) => {
-          this.mostrarError('Error al cargar los macroprocesos');
-          reject(error);
-        }
+        error: (err) => { this.mostrarError('Error al cargar los macroprocesos'); reject(err); }
       });
+    });
+  }
+
+  /** Cuando cambia el macroproceso en el formulario: recarga N1 si estamos en nivel 2 */
+  onMacroprocesoChange(macroprocesoId: number): void {
+    this.formulario.procesoPadreId = undefined;
+    this.procesosN1Options = [];
+    if (this.formulario.nivel === 2 && macroprocesoId && macroprocesoId !== 0) {
+      this.cargarProcesosN1(macroprocesoId);
+    }
+  }
+
+  /** Cuando cambia el nivel en el formulario */
+  onNivelChange(nivel: number): void {
+    this.formulario.procesoPadreId = undefined;
+    this.procesosN1Options = [];
+    if (nivel === 2 && this.formulario.macroprocesoId && this.formulario.macroprocesoId !== 0) {
+      this.cargarProcesosN1(this.formulario.macroprocesoId);
+    }
+  }
+
+  private cargarProcesosN1(macroprocesoId: number): void {
+    this.procesoService.getByMacroprocesoYNivel(macroprocesoId, 1).subscribe({
+      next: (data) => {
+        this.procesosN1Options = [
+          { label: 'Seleccione proceso N1 padre', value: 0 },
+          ...data.map(p => ({ label: `${p.codigo} - ${p.nombre}`, value: p.id! }))
+        ];
+      },
+      error: () => this.mostrarError('Error al cargar los procesos N1')
     });
   }
 
@@ -166,6 +189,7 @@ export class ProcesosListComponent implements OnInit {
     this.modoEdicion = false;
     this.mostrarFormulario = true;
     this.formulario = this.inicializarFormulario();
+    this.procesosN1Options = [];
     this.procesoSeleccionado = null;
   }
 
@@ -175,54 +199,56 @@ export class ProcesosListComponent implements OnInit {
     this.procesoSeleccionado = proceso;
     this.formulario = {
       macroprocesoId: proceso.macroprocesoId,
+      nivel: proceso.nivel,
+      procesoPadreId: proceso.procesoPadreId,
       nombre: proceso.nombre,
       descripcion: proceso.descripcion,
-      responsable: proceso.responsable,
+      objetivos: proceso.objetivos,
       estadoDocumentacion: proceso.estadoDocumentacion
     };
+    // Si es N2, precargar opciones de proceso padre
+    if (proceso.nivel === 2 && proceso.macroprocesoId) {
+      this.cargarProcesosN1(proceso.macroprocesoId);
+    }
   }
 
   guardar(): void {
-    if (this.formulario.macroprocesoId === 0) {
+    if (!this.formulario.macroprocesoId || this.formulario.macroprocesoId === 0) {
       this.mostrarAdvertencia('Debe seleccionar un macroproceso');
+      return;
+    }
+    if (this.formulario.nivel === 2 && (!this.formulario.procesoPadreId || this.formulario.procesoPadreId === 0)) {
+      this.mostrarAdvertencia('Debe seleccionar el Proceso N1 padre para un Proceso N2');
       return;
     }
 
     this.cargando = true;
-    if (this.modoEdicion && this.procesoSeleccionado) {
-      this.procesoService.update(this.procesoSeleccionado.id!, this.formulario).subscribe({
-        next: () => {
-          this.mostrarExito('Proceso actualizado exitosamente');
-          this.cargarProcesos();
-          this.cancelar();
-        },
-        error: (error) => {
-          this.mostrarError('Error al actualizar el proceso');
-        },
-        complete: () => {
-          this.cargando = false;
-        }
-      });
-    } else {
-      this.procesoService.create(this.formulario).subscribe({
-        next: () => {
-          this.mostrarExito('Proceso creado exitosamente');
-          this.cargarProcesos();
-          this.cancelar();
-        },
-        error: (error) => {
-          this.mostrarError('Error al crear el proceso');
-        },
-        complete: () => {
-          this.cargando = false;
-        }
-      });
-    }
+    const op$ = this.modoEdicion && this.procesoSeleccionado
+      ? this.procesoService.update(this.procesoSeleccionado.id!, this.formulario)
+      : this.procesoService.create(this.formulario);
+
+    op$.subscribe({
+      next: () => {
+        this.mostrarExito(this.modoEdicion ? 'Proceso actualizado exitosamente' : 'Proceso creado exitosamente');
+        this.cargarProcesos();
+        this.cancelar();
+      },
+      error: (err) => {
+        const msg = err?.error?.message || (this.modoEdicion ? 'Error al actualizar' : 'Error al crear');
+        this.mostrarError(msg);
+        this.cargando = false;
+      },
+      complete: () => { this.cargando = false; }
+    });
   }
 
   eliminar(proceso: Proceso): void {
+    const aviso = proceso.nivel === 1
+      ? `¿Eliminar el Proceso N1 "${proceso.nombre}"? Se eliminarán sus N2 asociados.`
+      : `¿Eliminar el Proceso N2 "${proceso.nombre}"?`;
+
     this.confirmationService.confirm({
-      message: `¿Está seguro de eliminar el proceso "${proceso.nombre}"?`,
+      message: aviso,
       header: 'Confirmar Eliminación',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí, eliminar',
@@ -231,16 +257,13 @@ export class ProcesosListComponent implements OnInit {
       accept: () => {
         this.cargando = true;
         this.procesoService.delete(proceso.id!).subscribe({
-          next: () => {
-            this.mostrarExito('Proceso eliminado exitosamente');
-            this.cargarProcesos();
-          },
-          error: (error) => {
-            this.mostrarError('Error al eliminar. Verifique que no tenga subprocesos asociados.');
-          },
-          complete: () => {
+          next: () => { this.mostrarExito('Proceso eliminado exitosamente'); this.cargarProcesos(); },
+          error: (err) => {
+            const msg = err?.error?.message || 'No se puede eliminar. Verifique dependencias.';
+            this.mostrarError(msg);
             this.cargando = false;
-          }
+          },
+          complete: () => { this.cargando = false; }
         });
       }
     });
@@ -250,77 +273,78 @@ export class ProcesosListComponent implements OnInit {
     this.mostrarFormulario = false;
     this.modoEdicion = false;
     this.procesoSeleccionado = null;
+    this.procesosN1Options = [];
     this.formulario = this.inicializarFormulario();
   }
 
   private inicializarFormulario(): ProcesoRequest {
     return {
       macroprocesoId: 0,
+      nivel: 1,
+      procesoPadreId: undefined,
       nombre: '',
       descripcion: '',
-      responsable: '',
+      objetivos: '',
       estadoDocumentacion: EstadoDocumentacion.NO_DOCUMENTADO
     };
   }
 
-  // Utilidades
-  getEstadoSeverity(estado: EstadoDocumentacion): "success" | "secondary" | "info" | "warning" | "danger" | "contrast" | undefined {
-    const severityMap: { [key in EstadoDocumentacion]: "success" | "secondary" | "info" | "warning" | "danger" | "contrast" } = {
-      [EstadoDocumentacion.NO_DOCUMENTADO]: 'secondary',
-      [EstadoDocumentacion.LEVANTAMIENTO]: 'info',
-      [EstadoDocumentacion.FLUJODIAGRAMACION]: 'info',
+  // ── Utilidades ────────────────────────────────────────────────────────────
+
+  getNivelLabel(nivel: number): string {
+    return nivel === 1 ? 'N1' : 'N2';
+  }
+
+  getNivelSeverity(nivel: number): 'info' | 'warning' {
+    return nivel === 1 ? 'info' : 'warning';
+  }
+
+  /** Para la columna "N° Hijos": muestra hijos N2 para N1, o subprocesos para N2 */
+  getCantidadHijos(proc: Proceso): number {
+    return proc.nivel === 1 ? (proc.cantidadProcesosHijos ?? 0) : (proc.cantidadSubprocesos ?? 0);
+  }
+
+  getEstadoSeverity(estado: EstadoDocumentacion): 'success' | 'secondary' | 'info' | 'warning' | 'danger' | 'contrast' | undefined {
+    const map: { [key in EstadoDocumentacion]: 'success' | 'secondary' | 'info' | 'warning' | 'danger' | 'contrast' } = {
+      [EstadoDocumentacion.NO_DOCUMENTADO]:  'secondary',
+      [EstadoDocumentacion.LEVANTAMIENTO]:   'info',
+      [EstadoDocumentacion.FLUJODIAGRAMACION]:'info',
       [EstadoDocumentacion.CARACTERIZACION]: 'warning',
-      [EstadoDocumentacion.VALIDACION]: 'warning',
-      [EstadoDocumentacion.LEGALIZADO]: 'success',
-      [EstadoDocumentacion.DIFUNDIDO]: 'success',
-      [EstadoDocumentacion.MEJORA]: 'contrast'
+      [EstadoDocumentacion.VALIDACION]:      'warning',
+      [EstadoDocumentacion.LEGALIZADO]:      'success',
+      [EstadoDocumentacion.DIFUNDIDO]:       'success',
+      [EstadoDocumentacion.MEJORA]:          'contrast'
     };
-    return severityMap[estado];
+    return map[estado];
   }
 
   getEstadoNombre(estado: EstadoDocumentacion): string {
-    const nombreMap: { [key in EstadoDocumentacion]: string } = {
-      [EstadoDocumentacion.NO_DOCUMENTADO]: 'No Documentado',
-      [EstadoDocumentacion.LEVANTAMIENTO]: 'Levantamiento',
-      [EstadoDocumentacion.FLUJODIAGRAMACION]: 'Flujodiagramación',
+    const map: { [key in EstadoDocumentacion]: string } = {
+      [EstadoDocumentacion.NO_DOCUMENTADO]:  'No Documentado',
+      [EstadoDocumentacion.LEVANTAMIENTO]:   'Levantamiento',
+      [EstadoDocumentacion.FLUJODIAGRAMACION]:'Flujodiagramación',
       [EstadoDocumentacion.CARACTERIZACION]: 'Caracterización',
-      [EstadoDocumentacion.VALIDACION]: 'Validación',
-      [EstadoDocumentacion.LEGALIZADO]: 'Legalizado',
-      [EstadoDocumentacion.DIFUNDIDO]: 'Difundido',
-      [EstadoDocumentacion.MEJORA]: 'Mejora Continua'
+      [EstadoDocumentacion.VALIDACION]:      'Validación',
+      [EstadoDocumentacion.LEGALIZADO]:      'Legalizado',
+      [EstadoDocumentacion.DIFUNDIDO]:       'Difundido',
+      [EstadoDocumentacion.MEJORA]:          'Mejora Continua'
     };
-    return nombreMap[estado];
+    return map[estado];
   }
 
   isColumnVisible(field: string): boolean {
     return this.selectedColumns.some(col => col.field === field);
   }
 
-  // Mensajes Toast
   private mostrarExito(mensaje: string): void {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Éxito',
-      detail: mensaje,
-      life: 3000
-    });
+    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: mensaje, life: 3000 });
   }
 
   private mostrarError(mensaje: string): void {
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: mensaje,
-      life: 5000
-    });
+    this.messageService.add({ severity: 'error', summary: 'Error', detail: mensaje, life: 5000 });
   }
 
   private mostrarAdvertencia(mensaje: string): void {
-    this.messageService.add({
-      severity: 'warn',
-      summary: 'Advertencia',
-      detail: mensaje,
-      life: 4000
-    });
+    this.messageService.add({ severity: 'warn', summary: 'Advertencia', detail: mensaje, life: 4000 });
   }
 }

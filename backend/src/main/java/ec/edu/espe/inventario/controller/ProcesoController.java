@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Controlador REST para Procesos
+ * Controlador REST para Procesos (N1 y N2)
  */
 @RestController
 @RequestMapping("/api/procesos")
@@ -22,87 +22,74 @@ import java.util.List;
 @Slf4j
 @CrossOrigin(origins = "${cors.allowed-origins}")
 public class ProcesoController {
-    
+
     private final ProcesoService procesoService;
-    
-    /**
-     * Crear un nuevo proceso
-     * POST /api/procesos
-     */
+
+    /** POST /api/procesos */
     @PostMapping
     public ResponseEntity<ProcesoResponseDTO> crear(@Valid @RequestBody ProcesoRequestDTO request) {
-        log.info("POST /api/procesos - Crear proceso");
-        ProcesoResponseDTO response = procesoService.crear(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.info("POST /api/procesos - Crear proceso N{}", request.getNivel());
+        return ResponseEntity.status(HttpStatus.CREATED).body(procesoService.crear(request));
     }
-    
-    /**
-     * Obtener todos los procesos
-     * GET /api/procesos
-     */
+
+    /** GET /api/procesos */
     @GetMapping
     public ResponseEntity<List<ProcesoResponseDTO>> obtenerTodos() {
-        log.info("GET /api/procesos - Obtener todos los procesos");
-        List<ProcesoResponseDTO> procesos = procesoService.obtenerTodos();
-        return ResponseEntity.ok(procesos);
+        return ResponseEntity.ok(procesoService.obtenerTodos());
     }
-    
-    /**
-     * Obtener procesos por macroproceso
-     * GET /api/procesos/macroproceso/{macroprocesoId}
-     */
+
+    /** GET /api/procesos/macroproceso/{macroprocesoId} */
     @GetMapping("/macroproceso/{macroprocesoId}")
     public ResponseEntity<List<ProcesoResponseDTO>> obtenerPorMacroproceso(@PathVariable Long macroprocesoId) {
-        log.info("GET /api/procesos/macroproceso/{} - Obtener procesos por macroproceso", macroprocesoId);
-        List<ProcesoResponseDTO> procesos = procesoService.obtenerPorMacroproceso(macroprocesoId);
-        return ResponseEntity.ok(procesos);
+        return ResponseEntity.ok(procesoService.obtenerPorMacroproceso(macroprocesoId));
     }
-    
+
     /**
-     * Obtener un proceso por ID con sus subprocesos
-     * GET /api/procesos/{id}
+     * GET /api/procesos/macroproceso/{macroprocesoId}/nivel/{nivel}
+     * Filtra Procesos N1 o N2 de un Macroproceso
      */
+    @GetMapping("/macroproceso/{macroprocesoId}/nivel/{nivel}")
+    public ResponseEntity<List<ProcesoResponseDTO>> obtenerPorMacroprocesoYNivel(
+            @PathVariable Long macroprocesoId,
+            @PathVariable int nivel) {
+        return ResponseEntity.ok(procesoService.obtenerPorMacroprocesoYNivel(macroprocesoId, nivel));
+    }
+
+    /**
+     * GET /api/procesos/padre/{procesoPadreId}
+     * Obtiene los Procesos N2 hijos de un Proceso N1
+     */
+    @GetMapping("/padre/{procesoPadreId}")
+    public ResponseEntity<List<ProcesoResponseDTO>> obtenerPorProcesoPadre(@PathVariable Long procesoPadreId) {
+        return ResponseEntity.ok(procesoService.obtenerPorProcesoPadre(procesoPadreId));
+    }
+
+    /** GET /api/procesos/{id} */
     @GetMapping("/{id}")
     public ResponseEntity<ProcesoResponseDTO> obtenerPorId(@PathVariable Long id) {
-        log.info("GET /api/procesos/{} - Obtener proceso por ID", id);
-        ProcesoResponseDTO proceso = procesoService.obtenerPorId(id);
-        return ResponseEntity.ok(proceso);
+        return ResponseEntity.ok(procesoService.obtenerPorId(id));
     }
-    
-    /**
-     * Actualizar un proceso
-     * PUT /api/procesos/{id}
-     */
+
+    /** PUT /api/procesos/{id} */
     @PutMapping("/{id}")
     public ResponseEntity<ProcesoResponseDTO> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody ProcesoRequestDTO request) {
-        log.info("PUT /api/procesos/{} - Actualizar proceso", id);
-        ProcesoResponseDTO response = procesoService.actualizar(id, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(procesoService.actualizar(id, request));
     }
-    
-    /**
-     * Eliminar un proceso
-     * DELETE /api/procesos/{id}
-     */
+
+    /** DELETE /api/procesos/{id} */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        log.info("DELETE /api/procesos/{} - Eliminar proceso", id);
         procesoService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
-    
-    /**
-     * Actualizar estado de documentación
-     * PATCH /api/procesos/{id}/estado
-     */
+
+    /** PATCH /api/procesos/{id}/estado */
     @PatchMapping("/{id}/estado")
     public ResponseEntity<ProcesoResponseDTO> actualizarEstado(
             @PathVariable Long id,
             @RequestParam EstadoDocumentacion nuevoEstado) {
-        log.info("PATCH /api/procesos/{}/estado - Actualizar estado a {}", id, nuevoEstado);
-        ProcesoResponseDTO response = procesoService.actualizarEstado(id, nuevoEstado);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(procesoService.actualizarEstado(id, nuevoEstado));
     }
 }

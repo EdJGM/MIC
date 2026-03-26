@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Controlador REST para Subprocesos
+ * Controlador REST para Subprocesos (SP-N1 y SP-N2)
  */
 @RestController
 @RequestMapping("/api/subprocesos")
@@ -22,87 +22,75 @@ import java.util.List;
 @Slf4j
 @CrossOrigin(origins = "${cors.allowed-origins}")
 public class SubprocesoController {
-    
+
     private final SubprocesoService subprocesoService;
-    
-    /**
-     * Crear un nuevo subproceso
-     * POST /api/subprocesos
-     */
+
+    /** POST /api/subprocesos */
     @PostMapping
     public ResponseEntity<SubprocesoResponseDTO> crear(@Valid @RequestBody SubprocesoRequestDTO request) {
-        log.info("POST /api/subprocesos - Crear subproceso");
-        SubprocesoResponseDTO response = subprocesoService.crear(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        log.info("POST /api/subprocesos - Crear subproceso SP-N{}", request.getNivel());
+        return ResponseEntity.status(HttpStatus.CREATED).body(subprocesoService.crear(request));
     }
-    
-    /**
-     * Obtener todos los subprocesos
-     * GET /api/subprocesos
-     */
+
+    /** GET /api/subprocesos */
     @GetMapping
     public ResponseEntity<List<SubprocesoResponseDTO>> obtenerTodos() {
-        log.info("GET /api/subprocesos - Obtener todos los subprocesos");
-        List<SubprocesoResponseDTO> subprocesos = subprocesoService.obtenerTodos();
-        return ResponseEntity.ok(subprocesos);
+        return ResponseEntity.ok(subprocesoService.obtenerTodos());
     }
-    
-    /**
-     * Obtener subprocesos por proceso
-     * GET /api/subprocesos/proceso/{procesoId}
-     */
+
+    /** GET /api/subprocesos/proceso/{procesoId} */
     @GetMapping("/proceso/{procesoId}")
     public ResponseEntity<List<SubprocesoResponseDTO>> obtenerPorProceso(@PathVariable Long procesoId) {
-        log.info("GET /api/subprocesos/proceso/{} - Obtener subprocesos por proceso", procesoId);
-        List<SubprocesoResponseDTO> subprocesos = subprocesoService.obtenerPorProceso(procesoId);
-        return ResponseEntity.ok(subprocesos);
+        return ResponseEntity.ok(subprocesoService.obtenerPorProceso(procesoId));
     }
-    
+
     /**
-     * Obtener un subproceso por ID
-     * GET /api/subprocesos/{id}
+     * GET /api/subprocesos/proceso/{procesoId}/nivel/{nivel}
+     * Filtra SP-N1 o SP-N2 de un Proceso N2
      */
+    @GetMapping("/proceso/{procesoId}/nivel/{nivel}")
+    public ResponseEntity<List<SubprocesoResponseDTO>> obtenerPorProcesoYNivel(
+            @PathVariable Long procesoId,
+            @PathVariable int nivel) {
+        return ResponseEntity.ok(subprocesoService.obtenerPorProcesoYNivel(procesoId, nivel));
+    }
+
+    /**
+     * GET /api/subprocesos/padre/{subprocesoPadreId}
+     * Obtiene los SP-N2 hijos de un SP-N1
+     */
+    @GetMapping("/padre/{subprocesoPadreId}")
+    public ResponseEntity<List<SubprocesoResponseDTO>> obtenerPorSubprocesoPadre(
+            @PathVariable Long subprocesoPadreId) {
+        return ResponseEntity.ok(subprocesoService.obtenerPorSubprocesoPadre(subprocesoPadreId));
+    }
+
+    /** GET /api/subprocesos/{id} */
     @GetMapping("/{id}")
     public ResponseEntity<SubprocesoResponseDTO> obtenerPorId(@PathVariable Long id) {
-        log.info("GET /api/subprocesos/{} - Obtener subproceso por ID", id);
-        SubprocesoResponseDTO subproceso = subprocesoService.obtenerPorId(id);
-        return ResponseEntity.ok(subproceso);
+        return ResponseEntity.ok(subprocesoService.obtenerPorId(id));
     }
-    
-    /**
-     * Actualizar un subproceso
-     * PUT /api/subprocesos/{id}
-     */
+
+    /** PUT /api/subprocesos/{id} */
     @PutMapping("/{id}")
     public ResponseEntity<SubprocesoResponseDTO> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody SubprocesoRequestDTO request) {
-        log.info("PUT /api/subprocesos/{} - Actualizar subproceso", id);
-        SubprocesoResponseDTO response = subprocesoService.actualizar(id, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(subprocesoService.actualizar(id, request));
     }
-    
-    /**
-     * Eliminar un subproceso
-     * DELETE /api/subprocesos/{id}
-     */
+
+    /** DELETE /api/subprocesos/{id} */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        log.info("DELETE /api/subprocesos/{} - Eliminar subproceso", id);
         subprocesoService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
-    
-    /**
-     * Actualizar estado de documentación
-     * PATCH /api/subprocesos/{id}/estado
-     */
+
+    /** PATCH /api/subprocesos/{id}/estado */
     @PatchMapping("/{id}/estado")
     public ResponseEntity<SubprocesoResponseDTO> actualizarEstado(
             @PathVariable Long id,
             @RequestParam EstadoDocumentacion nuevoEstado) {
-        log.info("PATCH /api/subprocesos/{}/estado - Actualizar estado a {}", id, nuevoEstado);
-        SubprocesoResponseDTO response = subprocesoService.actualizarEstado(id, nuevoEstado);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(subprocesoService.actualizarEstado(id, nuevoEstado));
     }
 }

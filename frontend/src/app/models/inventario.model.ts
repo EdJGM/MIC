@@ -43,15 +43,22 @@ export interface Proceso {
   codigo: string;
   nombre: string;
   descripcion: string;
-  responsable: string;
+  objetivos?: string;
+  /** 1 = Proceso N1 | 2 = Proceso N2 */
+  nivel: number;
   macroprocesoId: number;
   macroprocesoNombre?: string;
+  procesoPadreId?: number;
+  procesoPadreNombre?: string;
   estadoDocumentacion: EstadoDocumentacion;
   porcentajeAvance: number;
   fechaCreacion?: string;
   fechaActualizacion?: string;
   creadoPor?: string;
   actualizadoPor?: string;
+  /** Solo para N1: cantidad de Procesos N2 hijos */
+  cantidadProcesosHijos?: number;
+  /** Solo para N2: cantidad de Subprocesos N1 hijos */
   cantidadSubprocesos?: number;
   subprocesos?: Subproceso[];
 }
@@ -61,14 +68,20 @@ export interface Subproceso {
   codigo: string;
   nombre: string;
   descripcion: string;
+  /** 1 = Subproceso N1 | 2 = Subproceso N2 */
+  nivel: number;
   procesoId: number;
   procesoNombre?: string;
+  subprocesoPadreId?: number;
+  subprocesoPadreNombre?: string;
   estadoDocumentacion: EstadoDocumentacion;
   porcentajeAvance: number;
   fechaCreacion?: string;
   fechaActualizacion?: string;
   creadoPor?: string;
   actualizadoPor?: string;
+  /** Solo para SP-N1: cantidad de SP-N2 hijos */
+  cantidadSubprocesosHijos?: number;
 }
 
 export interface MacroprocesoRequest {
@@ -83,16 +96,25 @@ export interface MacroprocesoRequest {
 
 export interface ProcesoRequest {
   macroprocesoId: number;
+  /** 1 = N1 (default), 2 = N2 */
+  nivel?: number;
+  /** Obligatorio cuando nivel=2 */
+  procesoPadreId?: number;
   nombre: string;
-  descripcion: string;
-  responsable?: string;
+  descripcion?: string;
+  objetivos?: string;
   estadoDocumentacion?: EstadoDocumentacion;
 }
 
 export interface SubprocesoRequest {
-  procesoId: number;
+  /** Obligatorio para nivel=1; opcional para nivel=2 (se hereda del padre) */
+  procesoId?: number;
+  /** 1 = SP-N1 (default), 2 = SP-N2 */
+  nivel?: number;
+  /** Obligatorio cuando nivel=2 */
+  subprocesoPadreId?: number;
   nombre: string;
-  descripcion: string;
+  descripcion?: string;
   estadoDocumentacion?: EstadoDocumentacion;
 }
 

@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
     <p-toast></p-toast>
     <p-confirmDialog></p-confirmDialog>
 
@@ -19,21 +19,67 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Macroproceso -->
                         <div class="space-y-2">
-                            <label for="macroprocesoId" class="block text-sm font-bold text-gray-700 flex items-center">
+                            <label class="block text-sm font-bold text-gray-700 flex items-center">
                                 <i class="pi pi-sitemap mr-2 text-blue-600"></i>
                                 Macroproceso
                                 <span class="text-red-500 ml-1">*</span>
                             </label>
                             <app-dropdown [options]="macroprocesosOptions" optionLabel="label" optionValue="value"
                                 [(ngModel)]="formulario.macroprocesoId" name="macroprocesoId"
+                                (ngModelChange)="onMacroprocesoChange($event)"
                                 placeholder="Seleccione macroproceso" styleClass="w-full" [required]="true">
                             </app-dropdown>
                         </div>
 
+                        <!-- Nivel -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-bold text-gray-700 flex items-center">
+                                <i class="pi pi-list mr-2 text-blue-600"></i>
+                                Nivel
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <app-dropdown [options]="nivelesOptions" optionLabel="label" optionValue="value"
+                                [(ngModel)]="formulario.nivel" name="nivel"
+                                (ngModelChange)="onNivelChange($event)"
+                                placeholder="Seleccione nivel" styleClass="w-full" [required]="true">
+                            </app-dropdown>
+                        </div>
+                    </div>
+
+                    <!-- Proceso Padre (solo visible cuando nivel = 2) -->
+                    <div *ngIf="formulario.nivel === 2" class="space-y-2">
+                        <label class="block text-sm font-bold text-gray-700 flex items-center">
+                            <i class="pi pi-arrow-up mr-2 text-blue-600"></i>
+                            Proceso N1 Padre
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <app-dropdown [options]="procesosN1Options" optionLabel="label" optionValue="value"
+                            [(ngModel)]="formulario.procesoPadreId" name="procesoPadreId"
+                            placeholder="Seleccione el proceso N1 padre" styleClass="w-full"
+                            [required]="formulario.nivel === 2">
+                        </app-dropdown>
+                        <small *ngIf="procesosN1Options.length <= 1" class="text-amber-600 flex items-center gap-1">
+                            <i class="pi pi-exclamation-triangle"></i>
+                            Primero seleccione un macroproceso que tenga procesos N1
+                        </small>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Nombre -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-bold text-gray-700 flex items-center">
+                                <i class="pi pi-bookmark mr-2 text-blue-600"></i>
+                                Nombre del Proceso
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <app-input-text name="nombre" [(ngModel)]="formulario.nombre" [required]="true"
+                                placeholder="Ingrese el nombre del proceso" styleClass="w-full">
+                            </app-input-text>
+                        </div>
+
                         <!-- Estado -->
                         <div class="space-y-2">
-                            <label for="estadoDocumentacion"
-                                class="block text-sm font-bold text-gray-700 flex items-center">
+                            <label class="block text-sm font-bold text-gray-700 flex items-center">
                                 <i class="pi pi-file-edit mr-2 text-blue-600"></i>
                                 Estado de Documentación
                             </label>
@@ -44,38 +90,26 @@
                         </div>
                     </div>
 
-                    <!-- Nombre -->
-                    <div class="space-y-2">
-                        <label for="nombre" class="block text-sm font-bold text-gray-700 flex items-center">
-                            <i class="pi pi-bookmark mr-2 text-blue-600"></i>
-                            Nombre del Proceso
-                            <span class="text-red-500 ml-1">*</span>
-                        </label>
-                        <app-input-text id="nombre" name="nombre" [(ngModel)]="formulario.nombre" [required]="true"
-                            placeholder="Ingrese el nombre del proceso" styleClass="w-full">
-                        </app-input-text>
-                    </div>
-
                     <!-- Descripción -->
                     <div class="space-y-2">
-                        <label for="descripcion" class="block text-sm font-bold text-gray-700 flex items-center">
+                        <label class="block text-sm font-bold text-gray-700 flex items-center">
                             <i class="pi pi-align-left mr-2 text-blue-600"></i>
                             Descripción
                         </label>
-                        <app-textarea id="descripcion" name="descripcion" [(ngModel)]="formulario.descripcion"
-                            [rows]="4" placeholder="Describa el proceso..." styleClass="w-full">
+                        <app-textarea name="descripcion" [(ngModel)]="formulario.descripcion"
+                            [rows]="3" placeholder="Describa el proceso..." styleClass="w-full">
                         </app-textarea>
                     </div>
 
-                    <!-- Responsable -->
+                    <!-- Objetivos -->
                     <div class="space-y-2">
-                        <label for="responsable" class="block text-sm font-bold text-gray-700 flex items-center">
-                            <i class="pi pi-user mr-2 text-blue-600"></i>
-                            Responsable
+                        <label class="block text-sm font-bold text-gray-700 flex items-center">
+                            <i class="pi pi-flag mr-2 text-blue-600"></i>
+                            Objetivos
                         </label>
-                        <app-input-text id="responsable" name="responsable" [(ngModel)]="formulario.responsable"
-                            placeholder="Nombre del responsable" styleClass="w-full">
-                        </app-input-text>
+                        <app-textarea name="objetivos" [(ngModel)]="formulario.objetivos"
+                            [rows]="3" placeholder="Objetivos del proceso..." styleClass="w-full">
+                        </app-textarea>
                     </div>
 
                     <!-- Botones -->
@@ -108,14 +142,19 @@
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
             <app-data-table [value]="procesos" [columns]="selectedColumns" [showPaginator]="true" [rows]="10"
                 [rowsPerPageOptions]="[5, 10, 25, 50]"
-                [globalFilterFields]="['codigo', 'nombre', 'macroprocesoNombre', 'responsable']" [loading]="cargando"
-                [sortMode]="'multiple'" [colSpan]="selectedColumns.length + 1"
+                [globalFilterFields]="['codigo', 'nombre', 'macroprocesoNombre', 'procesoPadreNombre']"
+                [loading]="cargando" [sortMode]="'multiple'" [colSpan]="selectedColumns.length + 1"
                 emptyMessageTitle="No hay procesos registrados"
                 emptyMessageSubtitle="Agregue un nuevo proceso para comenzar"
                 styleClass="p-datatable-striped p-datatable-gridlines" [showActions]="true">
 
                 <ng-template #body let-proc>
                     <tr class="hover:bg-blue-50 transition-colors duration-200">
+                        <td *ngIf="isColumnVisible('nivel')" class="text-center">
+                            <p-tag [value]="getNivelLabel(proc.nivel)"
+                                [severity]="getNivelSeverity(proc.nivel)" styleClass="font-bold">
+                            </p-tag>
+                        </td>
                         <td *ngIf="isColumnVisible('codigo')" class="text-center">
                             <span class="font-mono font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">
                                 {{ proc.codigo }}
@@ -131,11 +170,13 @@
                             <p-tag [value]="proc.macroprocesoNombre" severity="info" styleClass="font-semibold">
                             </p-tag>
                         </td>
-                        <td *ngIf="isColumnVisible('responsable')" class="text-center">
-                            <div class="flex items-center justify-center gap-2">
-                                <i class="pi pi-user text-blue-600"></i>
-                                <span class="text-gray-700">{{ proc.responsable || 'N/A' }}</span>
-                            </div>
+                        <td *ngIf="isColumnVisible('procesoPadreNombre')" class="text-center">
+                            <span *ngIf="proc.procesoPadreNombre; else sinPadre" class="text-gray-700 text-sm">
+                                {{ proc.procesoPadreNombre }}
+                            </span>
+                            <ng-template #sinPadre>
+                                <span class="text-gray-400 text-xs italic">— N1 (sin padre)</span>
+                            </ng-template>
                         </td>
                         <td *ngIf="isColumnVisible('estadoDocumentacion')" class="text-center">
                             <p-tag [value]="getEstadoNombre(proc.estadoDocumentacion)"
@@ -148,17 +189,17 @@
                                     [style]="{'height': '24px', 'width': '100%', 'min-width': '120px'}">
                                 </p-progressBar>
                                 <span class="text-xs font-semibold" [ngClass]="{
-                        'text-red-600': proc.porcentajeAvance < 30,
-                        'text-yellow-600': proc.porcentajeAvance >= 30 && proc.porcentajeAvance < 60,
-                        'text-blue-600': proc.porcentajeAvance >= 60 && proc.porcentajeAvance < 90,
-                        'text-green-600': proc.porcentajeAvance >= 90
-                      }">
+                                    'text-red-600': proc.porcentajeAvance < 30,
+                                    'text-yellow-600': proc.porcentajeAvance >= 30 && proc.porcentajeAvance < 60,
+                                    'text-blue-600': proc.porcentajeAvance >= 60 && proc.porcentajeAvance < 90,
+                                    'text-green-600': proc.porcentajeAvance >= 90
+                                }">
                                     {{ proc.porcentajeAvance }}%
                                 </span>
                             </div>
                         </td>
-                        <td *ngIf="isColumnVisible('cantidadSubprocesos')" class="text-center">
-                            <p-tag [value]="(proc.cantidadSubprocesos || 0).toString()" severity="secondary"
+                        <td *ngIf="isColumnVisible('cantidadHijos')" class="text-center">
+                            <p-tag [value]="getCantidadHijos(proc).toString()" severity="secondary"
                                 styleClass="font-bold text-lg">
                             </p-tag>
                         </td>

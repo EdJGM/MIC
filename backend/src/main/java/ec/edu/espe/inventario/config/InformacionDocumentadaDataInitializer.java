@@ -9,6 +9,7 @@ import ec.edu.espe.inventario.repository.MacroprocesoRepository;
 import ec.edu.espe.inventario.repository.ProcesoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
  */
 @Component
 @RequiredArgsConstructor
+@Order(2)
 public class InformacionDocumentadaDataInitializer implements CommandLineRunner {
 
     private final InformacionDocumentadaRepository informacionDocumentadaRepository;

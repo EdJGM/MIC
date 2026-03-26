@@ -13,14 +13,21 @@ import java.util.Optional;
  */
 @Repository
 public interface SubprocesoRepository extends JpaRepository<Subproceso, Long> {
-    
+
     Optional<Subproceso> findByCodigo(String codigo);
-    
+
     List<Subproceso> findByProcesoId(Long procesoId);
-    
+
+    List<Subproceso> findByProcesoIdAndNivel(Long procesoId, int nivel);
+
+    /** Subprocesos N2 hijos de un Subproceso N1 */
+    List<Subproceso> findBySubprocesoPadreId(Long subprocesoPadreId);
+
+    Long countBySubprocesoPadreId(Long subprocesoPadreId);
+
     List<Subproceso> findByEstadoDocumentacion(EstadoDocumentacion estado);
-    
+
     boolean existsByCodigo(String codigo);
-    
+
     Long countByProcesoId(Long procesoId);
 }

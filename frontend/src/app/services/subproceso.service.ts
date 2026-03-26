@@ -28,6 +28,16 @@ export class SubprocesoService {
     return this.http.get<Subproceso[]>(`${this.apiUrl}/proceso/${procesoId}`);
   }
 
+  /** Filtra SP-N1 o SP-N2 de un Proceso N2 */
+  getByProcesoYNivel(procesoId: number, nivel: number): Observable<Subproceso[]> {
+    return this.http.get<Subproceso[]>(`${this.apiUrl}/proceso/${procesoId}/nivel/${nivel}`);
+  }
+
+  /** Obtiene los SP-N2 hijos de un SP-N1 */
+  getBySubprocesoPadre(subprocesoPadreId: number): Observable<Subproceso[]> {
+    return this.http.get<Subproceso[]>(`${this.apiUrl}/padre/${subprocesoPadreId}`);
+  }
+
   create(request: SubprocesoRequest): Observable<Subproceso> {
     return this.http.post<Subproceso>(this.apiUrl, request);
   }

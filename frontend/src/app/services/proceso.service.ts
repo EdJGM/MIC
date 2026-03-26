@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { 
-  Proceso, 
-  ProcesoRequest, 
-  EstadoDocumentacion 
+import {
+  Proceso,
+  ProcesoRequest,
+  EstadoDocumentacion
 } from '../models/inventario.model';
 import { environment } from '../../environments/environment';
 
@@ -26,6 +26,16 @@ export class ProcesoService {
 
   getByMacroproceso(macroprocesoId: number): Observable<Proceso[]> {
     return this.http.get<Proceso[]>(`${this.apiUrl}/macroproceso/${macroprocesoId}`);
+  }
+
+  /** Filtra Procesos N1 o N2 de un Macroproceso */
+  getByMacroprocesoYNivel(macroprocesoId: number, nivel: number): Observable<Proceso[]> {
+    return this.http.get<Proceso[]>(`${this.apiUrl}/macroproceso/${macroprocesoId}/nivel/${nivel}`);
+  }
+
+  /** Obtiene los Procesos N2 hijos de un Proceso N1 */
+  getByProcesoPadre(procesoPadreId: number): Observable<Proceso[]> {
+    return this.http.get<Proceso[]>(`${this.apiUrl}/padre/${procesoPadreId}`);
   }
 
   create(request: ProcesoRequest): Observable<Proceso> {
