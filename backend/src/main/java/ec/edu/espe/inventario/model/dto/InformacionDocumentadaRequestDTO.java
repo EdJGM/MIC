@@ -37,4 +37,5 @@ public class InformacionDocumentadaRequestDTO {
     private Integer anio;
     private String version;
     private Integer secuencial;
+    private Long documentoOrigenId;
 }

@@ -45,6 +45,7 @@ public class InformacionDocumentadaResponseDTO {
     private Integer anio;
     private String version;
     private Integer secuencial;
+    private Long documentoOrigenId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

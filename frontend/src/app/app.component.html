@@ -97,13 +97,31 @@
 
           <a routerLink="/configuracion-objetivos" routerLinkActive="active-nav-item" class="nav-item"
             (click)="closeSidebar()">
-            <i class="pi pi-cog text-gray-600"></i>
-            <span>Configuración General</span>
+            <i class="pi pi-bullseye text-gray-600"></i>
+            <span>Objetivos Específicos</span>
+          </a>
+
+          <a routerLink="/configuracion-parametros" routerLinkActive="active-nav-item" class="nav-item"
+            (click)="closeSidebar()">
+            <i class="pi pi-sliders-h text-gray-600"></i>
+            <span>Parámetros del Sistema</span>
           </a>
 
           <a routerLink="/usuarios" routerLinkActive="active-nav-item" class="nav-item" (click)="closeSidebar()">
             <i class="pi pi-users text-gray-600"></i>
             <span>Usuarios</span>
+          </a>
+
+          <a routerLink="/configuracion-auditoria" routerLinkActive="active-nav-item" class="nav-item"
+            (click)="closeSidebar()">
+            <i class="pi pi-list text-gray-600"></i>
+            <span>Log de Auditoría</span>
+          </a>
+
+          <a routerLink="/notificaciones" routerLinkActive="active-nav-item" class="nav-item"
+            (click)="closeSidebar()">
+            <i class="pi pi-bell text-gray-600"></i>
+            <span>Notificaciones</span>
           </a>
         </div>
       </nav>
@@ -143,9 +161,12 @@
         <!-- Right Section -->
         <div class="flex items-center gap-4">
           <!-- Notifications -->
-          <p-button type="button" icon="pi pi-bell" styleClass="p-button-rounded p-button-text p-button-plain"
-            [badge]="'3'" badgeClass="p-badge-danger" pRipple>
-          </p-button>
+          <a routerLink="/notificaciones" class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors">
+            <i class="pi pi-bell text-xl text-gray-700"></i>
+            <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+              {{ cantidadNotificaciones }}
+            </span>
+          </a>
 
           <!-- User Menu -->
           <div class="flex items-center gap-3 pl-4 border-l border-gray-200">

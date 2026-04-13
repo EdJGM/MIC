@@ -1,0 +1,151 @@
+<div class="p-4">
+  <div class="w-full">
+    <app-panel header="Gestión de Usuarios">
+      <ng-template #icons>
+        <app-button-add
+          tooltip="Nuevo Usuario"
+          (onClick)="nuevoUsuario()">
+        </app-button-add>
+      </ng-template>
+
+      <!-- Formulario Desglosable -->
+      <div *ngIf="mostrarFormulario" class="mb-4">
+        <p-card [header]="modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario'"
+                styleClass="p-card-form p-4">
+          <form (ngSubmit)="guardar()" #formUsuario="ngForm">
+            <div class="grid grid-cols-12 gap-4">
+
+              <div class="col-span-12 md:col-span-6">
+                <label class="block font-medium mb-2">ID Externo (Universidad) *</label>
+                <app-input-text
+                  name="externalId"
+                  [(ngModel)]="formulario.externalId"
+                  [required]="true"
+                  [disabled]="modoEdicion"
+                  placeholder="Ej: usr-espe-001">
+                </app-input-text>
+              </div>
+
+              <div class="col-span-12 md:col-span-6">
+                <label class="block font-medium mb-2">Nombre Completo *</label>
+                <app-input-text
+                  name="nombre"
+                  [(ngModel)]="formulario.nombre"
+                  [required]="true"
+                  placeholder="Ingrese el nombre completo">
+                </app-input-text>
+              </div>
+
+              <div class="col-span-12 md:col-span-6">
+                <label class="block font-medium mb-2">Correo Electrónico *</label>
+                <app-input-text
+                  name="email"
+                  type="email"
+                  [(ngModel)]="formulario.email"
+                  [required]="true"
+                  placeholder="usuario@espe.edu.ec">
+                </app-input-text>
+              </div>
+
+              <div class="col-span-12 md:col-span-6">
+                <label class="block font-medium mb-2">Teléfono</label>
+                <app-input-text
+                  name="telefono"
+                  type="tel"
+                  [(ngModel)]="formulario.telefono"
+                  placeholder="Ej: 0991234567">
+                </app-input-text>
+              </div>
+
+              <div class="col-span-12 md:col-span-6">
+                <label class="block font-medium mb-2">Rol *</label>
+                <app-dropdown
+                  name="rolLocal"
+                  [(ngModel)]="formulario.rolLocal"
+                  [options]="rolesOpciones"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Seleccione un rol"
+                  [required]="true">
+                </app-dropdown>
+              </div>
+
+              <div class="col-span-12 md:col-span-6">
+                <label class="block font-medium mb-2">Unidad Asignada</label>
+                <app-input-text
+                  name="unidadAsignada"
+                  [(ngModel)]="formulario.unidadAsignada"
+                  placeholder="Ej: UTIC, VDC, VAD">
+                </app-input-text>
+              </div>
+
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4">
+              <app-button-cancel (onClick)="cancelar()"></app-button-cancel>
+              <app-button-primary
+                type="submit"
+                [label]="modoEdicion ? 'Actualizar' : 'Guardar'"
+                icon="pi pi-save"
+                [disabled]="!formUsuario.valid">
+              </app-button-primary>
+            </div>
+          </form>
+        </p-card>
+      </div>
+
+      <!-- Tabla -->
+      <app-data-table
+        [value]="usuarios"
+        [columns]="cols"
+        [showActions]="true"
+        [showPaginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 25, 50]"
+        [globalFilterFields]="['nombre', 'email', 'externalId', 'unidadAsignada']"
+        [colSpan]="cols.length + 1"
+        emptyMessageTitle="No hay usuarios registrados"
+        emptyMessageSubtitle="Agregue un nuevo usuario para comenzar">
+
+        <ng-template #body let-usuario>
+          <tr>
+            <td><strong>{{ usuario.nombre }}</strong></td>
+            <td>{{ usuario.email }}</td>
+            <td><code>{{ usuario.externalId }}</code></td>
+            <td>
+              <p-tag
+                [value]="usuario.rolNombre"
+                [severity]="getRolSeverity(usuario.rolLocal)">
+              </p-tag>
+            </td>
+            <td>{{ usuario.unidadAsignada || '-' }}</td>
+            <td class="text-center">
+              <p-tag
+                [value]="usuario.activo ? 'Activo' : 'Inactivo'"
+                [severity]="usuario.activo ? 'success' : 'danger'">
+              </p-tag>
+            </td>
+            <td class="text-center">
+              <app-button-add
+                icon="pi pi-pencil"
+                tooltip="Editar"
+                size="small"
+                [customStyle]="{'background-color': '#ffc107', 'border-color': '#ffc107'}"
+                (onClick)="editarUsuario(usuario)">
+              </app-button-add>
+              <app-button-add
+                [icon]="usuario.activo ? 'pi pi-ban' : 'pi pi-check-circle'"
+                [tooltip]="usuario.activo ? 'Desactivar' : 'Activar'"
+                size="small"
+                [customStyle]="usuario.activo
+                  ? {'background-color': '#dc3545', 'border-color': '#dc3545', 'margin-left': '0.25rem'}
+                  : {'background-color': '#1a7b4e', 'border-color': '#1a7b4e', 'margin-left': '0.25rem'}"
+                (onClick)="toggleActivo(usuario)">
+              </app-button-add>
+            </td>
+          </tr>
+        </ng-template>
+      </app-data-table>
+    </app-panel>
+  </div>
+</div>

@@ -2,6 +2,7 @@ package ec.edu.espe.inventario.controller;
 
 import ec.edu.espe.inventario.model.dto.InformacionDocumentadaRequestDTO;
 import ec.edu.espe.inventario.model.dto.InformacionDocumentadaResponseDTO;
+import ec.edu.espe.inventario.model.dto.NuevaVersionRequestDTO;
 import ec.edu.espe.inventario.service.InformacionDocumentadaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -85,6 +86,32 @@ public class InformacionDocumentadaController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/{id}/nueva-version")
+    public ResponseEntity<InformacionDocumentadaResponseDTO> nuevaVersion(
+            @PathVariable Long id,
+            @RequestBody NuevaVersionRequestDTO request) {
+        try {
+            InformacionDocumentadaResponseDTO responseDTO = informacionDocumentadaService.nuevaVersion(id, request);
+            return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{id}/historial")
+    public ResponseEntity<List<InformacionDocumentadaResponseDTO>> obtenerHistorial(@PathVariable Long id) {
+        try {
+            List<InformacionDocumentadaResponseDTO> historial = informacionDocumentadaService.obtenerHistorial(id);
+            return new ResponseEntity<>(historial, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

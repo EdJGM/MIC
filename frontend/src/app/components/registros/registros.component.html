@@ -2,46 +2,170 @@
     <p-toast></p-toast>
     <p-confirmDialog></p-confirmDialog>
 
-    <!-- Loading Spinner -->
+    <!-- Loading -->
     <app-loading-spinner *ngIf="cargando"></app-loading-spinner>
 
-    <!-- Sección Matriz -->
+    <!-- ── Dialog: Nueva Versión ──────────────────────────────────────── -->
+    <p-dialog header="Nueva Versión del Documento" [(visible)]="mostrarDialogNuevaVersion"
+        [modal]="true" [style]="{'width': '500px'}" [closable]="true"
+        (onHide)="cancelarNuevaVersion()">
+        <div *ngIf="documentoParaVersion" class="space-y-4 py-2">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p class="text-sm font-semibold text-blue-800">
+                    <i class="pi pi-file mr-2"></i>{{ documentoParaVersion.nombreDocumento }}
+                </p>
+                <p class="text-xs text-blue-600 mt-1">
+                    Versión actual: <strong>{{ documentoParaVersion.version || 'V1' }}</strong>
+                    &nbsp;→&nbsp;
+                    Nueva versión: <strong>{{ 'V' + ((+(documentoParaVersion.version?.substring(1) || '1')) + 1) }}</strong>
+                </p>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700">
+                    <i class="pi pi-link mr-2 text-indigo-600"></i>
+                    Nuevo enlace al archivo <span class="text-red-500">*</span>
+                </label>
+                <app-input-text [(ngModel)]="nuevaVersionForm.enlaceArchivo"
+                    name="enlaceArchivo" placeholder="https://drive.google.com/..."
+                    styleClass="w-full">
+                </app-input-text>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700">
+                    <i class="pi pi-align-left mr-2 text-indigo-600"></i>
+                    Observaciones del cambio
+                </label>
+                <app-textarea [(ngModel)]="nuevaVersionForm.observaciones"
+                    name="observaciones" [rows]="3"
+                    placeholder="Describa los cambios realizados en esta versión..."
+                    styleClass="w-full">
+                </app-textarea>
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <app-button-cancel label="Cancelar" icon="pi pi-times"
+                (onClick)="cancelarNuevaVersion()">
+            </app-button-cancel>
+            <app-button-primary label="Crear nueva versión" icon="pi pi-save"
+                [loading]="guardandoVersion" [disabled]="guardandoVersion"
+                (onClick)="guardarNuevaVersion()">
+            </app-button-primary>
+        </ng-template>
+    </p-dialog>
+
+    <!-- ── Dialog: Historial de Versiones ─────────────────────────────── -->
+    <p-dialog [header]="'Historial de versiones: ' + documentoHistorialTitulo"
+        [(visible)]="mostrarDialogHistorial" [modal]="true"
+        [style]="{'width': '800px', 'max-width': '95vw'}" [closable]="true">
+        <div *ngIf="cargandoHistorial" class="flex justify-center py-8">
+            <i class="pi pi-spin pi-spinner text-3xl text-indigo-600"></i>
+        </div>
+        <p-table *ngIf="!cargandoHistorial" [value]="historialVersiones"
+            styleClass="p-datatable-sm p-datatable-striped" [scrollable]="true">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Versión</th>
+                    <th>Código</th>
+                    <th>Enlace</th>
+                    <th>Motivo</th>
+                    <th>Estado</th>
+                    <th>Fecha Registro</th>
+                    <th>Observaciones</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ver>
+                <tr>
+                    <td>
+                        <p-tag [value]="ver.version || 'V1'"
+                            [severity]="getVersionSeverity(ver.version)">
+                        </p-tag>
+                    </td>
+                    <td class="font-mono text-xs">{{ ver.codigoDocumento || 'N/A' }}</td>
+                    <td>
+                        <a *ngIf="ver.enlaceArchivo" [href]="ver.enlaceArchivo"
+                            target="_blank" class="text-indigo-600 hover:underline text-sm">
+                            <i class="pi pi-external-link mr-1"></i>Ver archivo
+                        </a>
+                        <span *ngIf="!ver.enlaceArchivo" class="text-gray-400">Sin enlace</span>
+                    </td>
+                    <td>
+                        <p-tag [value]="ver.motivo || 'N/A'"
+                            [severity]="getMotivoSeverity(ver.motivo)">
+                        </p-tag>
+                    </td>
+                    <td>
+                        <p-tag [value]="ver.estado || 'N/A'"
+                            [severity]="getEstadoSeverity(ver.estado)">
+                        </p-tag>
+                    </td>
+                    <td class="text-sm">{{ formatearFecha(ver.fechaSolicitud) }}</td>
+                    <td class="text-xs text-gray-600">{{ ver.observaciones || '—' }}</td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr><td colspan="7" class="text-center py-4 text-gray-400">Sin historial de versiones</td></tr>
+            </ng-template>
+        </p-table>
+    </p-dialog>
+
+    <!-- ── Tabla por sede (Macro) ─────────────────────────────────────── -->
+    <ng-template #sedeBody let-documentos="documentos">
+    </ng-template>
+
+    <!-- MATRIZ -->
     <app-panel header="MATRIZ" [toggleable]="true" [collapsed]="false" class="sede-panel matriz-panel">
-
         <app-data-table [value]="documentosMatriz" [columns]="columnas"
-            [globalFilterFields]="['unidad', 'solicitadoPor', 'nombreDocumento', 'tipoDocumento', 'codigoDocumento']"
+            [globalFilterFields]="['unidad','solicitadoPor','nombreDocumento','tipoDocumento','codigoDocumento','version']"
             [showPaginator]="true" [rows]="10" styleClass="matriz-table" [showActions]="true">
-
-            <ng-template #body let-documento>
+            <ng-template #body let-doc>
                 <tr>
-                    <td *ngFor="let col of columnas">
-                        <ng-container [ngSwitch]="col.field">
-                            <ng-container *ngSwitchCase="'fechaSolicitud'">
-                                {{ formatearFecha(documento[col.field]) }}
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'fechaProtocolo'">
-                                {{ formatearFecha(documento[col.field]) }}
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'fechaEliminacion'">
-                                {{ formatearFecha(documento[col.field]) }}
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'enlaceArchivo'">
-                                <a *ngIf="documento[col.field]" [href]="documento[col.field]" target="_blank"
-                                    class="link-archivo">
-                                    <i class="pi pi-external-link"></i> Ver
-                                </a>
-                                <span *ngIf="!documento[col.field]">N/A</span>
-                            </ng-container>
-                            <ng-container *ngSwitchDefault>
-                                {{ documento[col.field] || 'N/A' }}
-                            </ng-container>
-                        </ng-container>
+                    <td>
+                        <p-tag [value]="doc.version || 'V1'" [severity]="getVersionSeverity(doc.version)"></p-tag>
+                    </td>
+                    <td class="font-mono text-xs text-indigo-700">{{ doc.codigoDocumento || 'N/A' }}</td>
+                    <td>
+                        <div class="font-medium text-sm">{{ doc.nombreDocumento }}</div>
+                        <div *ngIf="doc.observaciones" class="text-xs text-gray-500 mt-1">{{ doc.observaciones }}</div>
+                    </td>
+                    <td>{{ doc.tipoDocumento || 'N/A' }}</td>
+                    <td>{{ doc.unidad || 'N/A' }}</td>
+                    <td>{{ doc.solicitadoPor || 'N/A' }}</td>
+                    <td>{{ doc.macroprocesoNombre || 'N/A' }}</td>
+                    <td>{{ doc.procesoN1Nombre || 'N/A' }}</td>
+                    <td>{{ doc.procesoN2Nombre || 'N/A' }}</td>
+                    <td>{{ formatearFecha(doc.fechaProtocolo) }}</td>
+                    <td>
+                        <a *ngIf="doc.enlaceArchivo" [href]="doc.enlaceArchivo" target="_blank"
+                            class="text-indigo-600 hover:underline text-sm">
+                            <i class="pi pi-external-link mr-1"></i>Ver
+                        </a>
+                        <span *ngIf="!doc.enlaceArchivo" class="text-gray-400 text-sm">Sin enlace</span>
                     </td>
                     <td>
-                        <div class="action-buttons">
+                        <p-tag [value]="doc.motivo || 'N/A'" [severity]="getMotivoSeverity(doc.motivo)"></p-tag>
+                    </td>
+                    <td>
+                        <p-tag [value]="doc.estado || 'N/A'" [severity]="getEstadoSeverity(doc.estado)"></p-tag>
+                    </td>
+                    <td>{{ formatearFecha(doc.fechaSolicitud) }}</td>
+                    <td>
+                        <div class="flex items-center gap-1">
+                            <button pButton type="button" icon="pi pi-copy"
+                                class="p-button-rounded p-button-info p-button-sm"
+                                pTooltip="Nueva versión" tooltipPosition="top"
+                                (click)="abrirNuevaVersion(doc)">
+                            </button>
+                            <button pButton type="button" icon="pi pi-history"
+                                class="p-button-rounded p-button-secondary p-button-sm"
+                                pTooltip="Ver historial" tooltipPosition="top"
+                                (click)="verHistorial(doc)">
+                            </button>
                             <button pButton type="button" icon="pi pi-trash"
-                                class="p-button-rounded p-button-danger p-button-text"
-                                (click)="confirmarEliminar(documento)" pTooltip="Eliminar" tooltipPosition="top">
+                                class="p-button-rounded p-button-danger p-button-sm"
+                                pTooltip="Eliminar" tooltipPosition="top"
+                                (click)="confirmarEliminar(doc)">
                             </button>
                         </div>
                     </td>
@@ -50,37 +174,58 @@
         </app-data-table>
     </app-panel>
 
-    <!-- Sección Latacunga -->
+    <!-- LATACUNGA -->
     <app-panel header="LATACUNGA" [toggleable]="true" [collapsed]="true" class="sede-panel latacunga-panel">
-
         <app-data-table [value]="documentosLatacunga" [columns]="columnas"
-            [globalFilterFields]="['unidad', 'solicitadoPor', 'nombreDocumento', 'tipoDocumento', 'codigoDocumento']"
+            [globalFilterFields]="['unidad','solicitadoPor','nombreDocumento','tipoDocumento','codigoDocumento','version']"
             [showPaginator]="true" [rows]="10" styleClass="latacunga-table" [showActions]="true">
-
-            <ng-template #body let-documento>
+            <ng-template #body let-doc>
                 <tr>
-                    <td *ngFor="let col of columnas">
-                        <ng-container [ngSwitch]="col.field">
-                            <ng-container *ngSwitchCase="'fechaSolicitud'">
-                                {{ formatearFecha(documento[col.field]) }}
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'enlaceArchivo'">
-                                <a *ngIf="documento[col.field]" [href]="documento[col.field]" target="_blank"
-                                    class="link-archivo">
-                                    <i class="pi pi-external-link"></i> Ver
-                                </a>
-                                <span *ngIf="!documento[col.field]">N/A</span>
-                            </ng-container>
-                            <ng-container *ngSwitchDefault>
-                                {{ documento[col.field] || 'N/A' }}
-                            </ng-container>
-                        </ng-container>
+                    <td>
+                        <p-tag [value]="doc.version || 'V1'" [severity]="getVersionSeverity(doc.version)"></p-tag>
+                    </td>
+                    <td class="font-mono text-xs text-indigo-700">{{ doc.codigoDocumento || 'N/A' }}</td>
+                    <td>
+                        <div class="font-medium text-sm">{{ doc.nombreDocumento }}</div>
+                        <div *ngIf="doc.observaciones" class="text-xs text-gray-500 mt-1">{{ doc.observaciones }}</div>
+                    </td>
+                    <td>{{ doc.tipoDocumento || 'N/A' }}</td>
+                    <td>{{ doc.unidad || 'N/A' }}</td>
+                    <td>{{ doc.solicitadoPor || 'N/A' }}</td>
+                    <td>{{ doc.macroprocesoNombre || 'N/A' }}</td>
+                    <td>{{ doc.procesoN1Nombre || 'N/A' }}</td>
+                    <td>{{ doc.procesoN2Nombre || 'N/A' }}</td>
+                    <td>{{ formatearFecha(doc.fechaProtocolo) }}</td>
+                    <td>
+                        <a *ngIf="doc.enlaceArchivo" [href]="doc.enlaceArchivo" target="_blank"
+                            class="text-indigo-600 hover:underline text-sm">
+                            <i class="pi pi-external-link mr-1"></i>Ver
+                        </a>
+                        <span *ngIf="!doc.enlaceArchivo" class="text-gray-400 text-sm">Sin enlace</span>
                     </td>
                     <td>
-                        <div class="action-buttons">
+                        <p-tag [value]="doc.motivo || 'N/A'" [severity]="getMotivoSeverity(doc.motivo)"></p-tag>
+                    </td>
+                    <td>
+                        <p-tag [value]="doc.estado || 'N/A'" [severity]="getEstadoSeverity(doc.estado)"></p-tag>
+                    </td>
+                    <td>{{ formatearFecha(doc.fechaSolicitud) }}</td>
+                    <td>
+                        <div class="flex items-center gap-1">
+                            <button pButton type="button" icon="pi pi-copy"
+                                class="p-button-rounded p-button-info p-button-sm"
+                                pTooltip="Nueva versión" tooltipPosition="top"
+                                (click)="abrirNuevaVersion(doc)">
+                            </button>
+                            <button pButton type="button" icon="pi pi-history"
+                                class="p-button-rounded p-button-secondary p-button-sm"
+                                pTooltip="Ver historial" tooltipPosition="top"
+                                (click)="verHistorial(doc)">
+                            </button>
                             <button pButton type="button" icon="pi pi-trash"
-                                class="p-button-rounded p-button-danger p-button-text"
-                                (click)="confirmarEliminar(documento)">
+                                class="p-button-rounded p-button-danger p-button-sm"
+                                pTooltip="Eliminar" tooltipPosition="top"
+                                (click)="confirmarEliminar(doc)">
                             </button>
                         </div>
                     </td>
@@ -89,37 +234,58 @@
         </app-data-table>
     </app-panel>
 
-    <!-- Sección Santo Domingo -->
+    <!-- SANTO DOMINGO -->
     <app-panel header="SANTO DOMINGO" [toggleable]="true" [collapsed]="true" class="sede-panel santo-domingo-panel">
-
         <app-data-table [value]="documentosSantoDomingo" [columns]="columnas"
-            [globalFilterFields]="['unidad', 'solicitadoPor', 'nombreDocumento', 'tipoDocumento', 'codigoDocumento']"
+            [globalFilterFields]="['unidad','solicitadoPor','nombreDocumento','tipoDocumento','codigoDocumento','version']"
             [showPaginator]="true" [rows]="10" styleClass="santo-domingo-table" [showActions]="true">
-
-            <ng-template #body let-documento>
+            <ng-template #body let-doc>
                 <tr>
-                    <td *ngFor="let col of columnas">
-                        <ng-container [ngSwitch]="col.field">
-                            <ng-container *ngSwitchCase="'fechaSolicitud'">
-                                {{ formatearFecha(documento[col.field]) }}
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'enlaceArchivo'">
-                                <a *ngIf="documento[col.field]" [href]="documento[col.field]" target="_blank"
-                                    class="link-archivo">
-                                    <i class="pi pi-external-link"></i> Ver
-                                </a>
-                                <span *ngIf="!documento[col.field]">N/A</span>
-                            </ng-container>
-                            <ng-container *ngSwitchDefault>
-                                {{ documento[col.field] || 'N/A' }}
-                            </ng-container>
-                        </ng-container>
+                    <td>
+                        <p-tag [value]="doc.version || 'V1'" [severity]="getVersionSeverity(doc.version)"></p-tag>
+                    </td>
+                    <td class="font-mono text-xs text-indigo-700">{{ doc.codigoDocumento || 'N/A' }}</td>
+                    <td>
+                        <div class="font-medium text-sm">{{ doc.nombreDocumento }}</div>
+                        <div *ngIf="doc.observaciones" class="text-xs text-gray-500 mt-1">{{ doc.observaciones }}</div>
+                    </td>
+                    <td>{{ doc.tipoDocumento || 'N/A' }}</td>
+                    <td>{{ doc.unidad || 'N/A' }}</td>
+                    <td>{{ doc.solicitadoPor || 'N/A' }}</td>
+                    <td>{{ doc.macroprocesoNombre || 'N/A' }}</td>
+                    <td>{{ doc.procesoN1Nombre || 'N/A' }}</td>
+                    <td>{{ doc.procesoN2Nombre || 'N/A' }}</td>
+                    <td>{{ formatearFecha(doc.fechaProtocolo) }}</td>
+                    <td>
+                        <a *ngIf="doc.enlaceArchivo" [href]="doc.enlaceArchivo" target="_blank"
+                            class="text-indigo-600 hover:underline text-sm">
+                            <i class="pi pi-external-link mr-1"></i>Ver
+                        </a>
+                        <span *ngIf="!doc.enlaceArchivo" class="text-gray-400 text-sm">Sin enlace</span>
                     </td>
                     <td>
-                        <div class="action-buttons">
+                        <p-tag [value]="doc.motivo || 'N/A'" [severity]="getMotivoSeverity(doc.motivo)"></p-tag>
+                    </td>
+                    <td>
+                        <p-tag [value]="doc.estado || 'N/A'" [severity]="getEstadoSeverity(doc.estado)"></p-tag>
+                    </td>
+                    <td>{{ formatearFecha(doc.fechaSolicitud) }}</td>
+                    <td>
+                        <div class="flex items-center gap-1">
+                            <button pButton type="button" icon="pi pi-copy"
+                                class="p-button-rounded p-button-info p-button-sm"
+                                pTooltip="Nueva versión" tooltipPosition="top"
+                                (click)="abrirNuevaVersion(doc)">
+                            </button>
+                            <button pButton type="button" icon="pi pi-history"
+                                class="p-button-rounded p-button-secondary p-button-sm"
+                                pTooltip="Ver historial" tooltipPosition="top"
+                                (click)="verHistorial(doc)">
+                            </button>
                             <button pButton type="button" icon="pi pi-trash"
-                                class="p-button-rounded p-button-danger p-button-text"
-                                (click)="confirmarEliminar(documento)">
+                                class="p-button-rounded p-button-danger p-button-sm"
+                                pTooltip="Eliminar" tooltipPosition="top"
+                                (click)="confirmarEliminar(doc)">
                             </button>
                         </div>
                     </td>

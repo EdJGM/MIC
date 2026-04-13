@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,4 +32,12 @@ public interface InformacionDocumentadaRepository extends JpaRepository<Informac
     
     @Query("SELECT i FROM InformacionDocumentada i WHERE i.estado = :estado ORDER BY i.mes ASC, i.codigoDocumento ASC")
     List<InformacionDocumentada> findAllActivosOrdenados(@Param("estado") EstadoDocumento estado);
+
+    @Query("SELECT i FROM InformacionDocumentada i WHERE i.estado = 'ACTIVO' AND i.fechaProtocolo IS NOT NULL AND i.fechaProtocolo BETWEEN :desde AND :hasta")
+    List<InformacionDocumentada> findActivosConFechaProtocoloEntre(@Param("desde") LocalDate desde, @Param("hasta") LocalDate hasta);
+
+    List<InformacionDocumentada> findByDocumentoOrigenIdOrderByCreatedAtDesc(Long documentoOrigenId);
+
+    @Query("SELECT i FROM InformacionDocumentada i WHERE (i.id = :origenId OR i.documentoOrigenId = :origenId) ORDER BY i.createdAt DESC")
+    List<InformacionDocumentada> findHistorialByOrigenId(@Param("origenId") Long origenId);
 }

@@ -3,7 +3,9 @@ package ec.edu.espe.inventario.service;
 import ec.edu.espe.inventario.model.dto.*;
 import ec.edu.espe.inventario.model.entity.Macroproceso;
 import ec.edu.espe.inventario.model.entity.Proceso;
+import ec.edu.espe.inventario.model.enums.AccionAudit;
 import ec.edu.espe.inventario.model.enums.EstadoDocumentacion;
+import ec.edu.espe.inventario.model.enums.TipoNotificacion;
 import ec.edu.espe.inventario.repository.MacroprocesoRepository;
 import ec.edu.espe.inventario.repository.ProcesoRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +24,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProcesoService {
 
+    private static final String USUARIO_ID = "admin-espe-001";
+    private static final String USUARIO_NOMBRE = "Administrador";
+    private static final String MODULO = "PROCESOS";
+
     private final ProcesoRepository procesoRepository;
     private final MacroprocesoRepository macroprocesoRepository;
     private final SubprocesoService subprocesoService;
+    private final AuditLogService auditLogService;
+    private final NotificacionService notificacionService;
 
     // -------------------------------------------------------------------------
     // Generación de código
@@ -102,6 +110,9 @@ public class ProcesoService {
         propagarAvanceHaciaArriba(saved);
 
         log.info("Proceso N{} creado con ID: {}", nivel, saved.getId());
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.CREAR,
+                MODULO, saved.getId(), "Proceso N" + nivel + " creado: " + saved.getNombre());
+
         return convertirADTOSimple(saved);
     }
 
@@ -156,7 +167,7 @@ public class ProcesoService {
     }
 
     /**
-     * Actualizar proceso
+     * Actualizar proceso (nombre, descripción, estado y jerarquía)
      */
     @Transactional
     public ProcesoResponseDTO actualizar(Long id, ProcesoRequestDTO request) {
@@ -165,17 +176,47 @@ public class ProcesoService {
         Proceso proceso = procesoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Proceso no encontrado con ID: " + id));
 
+        // Actualizar campos de datos
         proceso.setNombre(request.getNombre());
         proceso.setDescripcion(request.getDescripcion());
         proceso.setObjetivos(request.getObjetivos());
         if (request.getEstadoDocumentacion() != null) {
             proceso.setEstadoDocumentacion(request.getEstadoDocumentacion());
         }
+
+        // Actualizar macroproceso si cambió
+        if (request.getMacroprocesoId() != null
+                && !request.getMacroprocesoId().equals(proceso.getMacroproceso().getId())) {
+            Macroproceso macroproceso = macroprocesoRepository.findById(request.getMacroprocesoId())
+                    .orElseThrow(() -> new RuntimeException("Macroproceso no encontrado con ID: " + request.getMacroprocesoId()));
+            proceso.setMacroproceso(macroproceso);
+        }
+
+        // Actualizar nivel y proceso padre
+        int nivel = request.getNivel() != null ? request.getNivel() : proceso.getNivel();
+        proceso.setNivel(nivel);
+        if (nivel == 2) {
+            if (request.getProcesoPadreId() == null) {
+                throw new RuntimeException("procesoPadreId es obligatorio para Proceso N2");
+            }
+            Proceso padre = procesoRepository.findById(request.getProcesoPadreId())
+                    .orElseThrow(() -> new RuntimeException("Proceso N1 padre no encontrado con ID: " + request.getProcesoPadreId()));
+            if (padre.getNivel() != 1) {
+                throw new RuntimeException("El proceso padre debe ser de nivel 1");
+            }
+            proceso.setProcesoPadre(padre);
+        } else {
+            proceso.setProcesoPadre(null);
+        }
+
         proceso.setActualizadoPor("admin");
         proceso.calcularPorcentajeAvance();
 
         Proceso updated = procesoRepository.save(proceso);
         propagarAvanceHaciaArriba(updated);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.ACTUALIZAR,
+                MODULO, updated.getId(), "Proceso actualizado: " + updated.getNombre());
 
         return convertirADTOSimple(updated);
     }
@@ -199,6 +240,8 @@ public class ProcesoService {
 
         Macroproceso macroproceso = proceso.getMacroproceso();
         Proceso padre = proceso.getProcesoPadre();
+        String nombre = proceso.getNombre();
+        int nivel = proceso.getNivel();
         procesoRepository.delete(proceso);
 
         if (padre != null) {
@@ -210,6 +253,9 @@ public class ProcesoService {
         }
         macroproceso.calcularPorcentajeAvance();
         macroprocesoRepository.save(macroproceso);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.ELIMINAR,
+                MODULO, id, "Proceso N" + nivel + " eliminado: " + nombre);
     }
 
     /**
@@ -228,6 +274,13 @@ public class ProcesoService {
 
         Proceso updated = procesoRepository.save(proceso);
         propagarAvanceHaciaArriba(updated);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.CAMBIO_ESTADO,
+                MODULO, updated.getId(), "Estado actualizado a " + nuevoEstado + " en: " + updated.getNombre());
+        notificacionService.crear(TipoNotificacion.SISTEMA,
+                "Estado de proceso actualizado",
+                "El proceso \"" + updated.getNombre() + "\" cambió a estado: " + nuevoEstado.name(),
+                USUARIO_ID, updated.getId(), MODULO);
 
         return convertirADTOSimple(updated);
     }

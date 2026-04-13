@@ -40,4 +40,12 @@ export class InformacionDocumentadaService {
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  nuevaVersion(id: number, request: { enlaceArchivo: string; observaciones?: string }): Observable<InformacionDocumentada> {
+    return this.http.post<InformacionDocumentada>(`${this.apiUrl}/${id}/nueva-version`, request, this.httpOptions);
+  }
+
+  getHistorialVersiones(id: number): Observable<InformacionDocumentada[]> {
+    return this.http.get<InformacionDocumentada[]>(`${this.apiUrl}/${id}/historial`);
+  }
 }

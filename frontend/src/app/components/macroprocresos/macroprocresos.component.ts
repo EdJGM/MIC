@@ -40,7 +40,7 @@ interface Column {
 }
 
 @Component({
-  selector: 'app-subprocesos-list',
+  selector: 'app-macroprocesos-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -201,7 +201,9 @@ export class MacroprocesosListComponent implements OnInit {
           this.cancelar();
         },
         error: (error) => {
-          this.mostrarError('Error al actualizar el macroproceso');
+          const msg = error?.error?.message || 'Error al actualizar el macroproceso';
+          this.mostrarError(msg);
+          this.cargando = false;
         },
         complete: () => {
           this.cargando = false;
@@ -215,7 +217,9 @@ export class MacroprocesosListComponent implements OnInit {
           this.cancelar();
         },
         error: (error) => {
-          this.mostrarError('Error al crear el macroproceso');
+          const msg = error?.error?.message || 'Error al crear el macroproceso';
+          this.mostrarError(msg);
+          this.cargando = false;
         },
         complete: () => {
           this.cargando = false;
@@ -240,7 +244,9 @@ export class MacroprocesosListComponent implements OnInit {
             this.cargarMacroprocesos();
           },
           error: (error) => {
-            this.mostrarError('Error al eliminar. Verifique que no tenga procesos asociados.');
+            const msg = error?.error?.message || 'Error al eliminar. Verifique que no tenga procesos asociados.';
+            this.mostrarError(msg);
+            this.cargando = false;
           },
           complete: () => {
             this.cargando = false;

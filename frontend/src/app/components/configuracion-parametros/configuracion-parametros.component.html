@@ -1,0 +1,86 @@
+<div class="p-4">
+  <div class="w-full">
+    <app-panel header="Parámetros del Sistema">
+
+      <!-- Formulario edición inline -->
+      <div *ngIf="mostrarFormulario && parametroSeleccionado" class="mb-4">
+        <p-card [header]="'Editar: ' + parametroSeleccionado.clave" styleClass="p-card-form p-4">
+          <form (ngSubmit)="guardar()" #formParametro="ngForm">
+            <div class="grid grid-cols-12 gap-4">
+
+              <div class="col-span-12 md:col-span-4">
+                <label class="block font-medium mb-2">Clave</label>
+                <app-input-text
+                  [ngModel]="parametroSeleccionado.clave"
+                  name="claveReadonly"
+                  [disabled]="true">
+                </app-input-text>
+              </div>
+
+              <div class="col-span-12 md:col-span-4">
+                <label class="block font-medium mb-2">Nuevo Valor *</label>
+                <app-input-text
+                  name="valor"
+                  [(ngModel)]="formulario.valor"
+                  [required]="true"
+                  placeholder="Ingrese el nuevo valor">
+                </app-input-text>
+              </div>
+
+              <div class="col-span-12 md:col-span-4">
+                <label class="block font-medium mb-2">Descripción</label>
+                <p class="text-sm text-gray-600 mt-2">{{ parametroSeleccionado.descripcion }}</p>
+              </div>
+
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4">
+              <app-button-cancel (onClick)="cancelar()"></app-button-cancel>
+              <app-button-primary
+                type="submit"
+                label="Actualizar"
+                icon="pi pi-save"
+                [disabled]="!formParametro.valid">
+              </app-button-primary>
+            </div>
+          </form>
+        </p-card>
+      </div>
+
+      <!-- Tabla -->
+      <app-data-table
+        [value]="parametros"
+        [columns]="cols"
+        [showActions]="true"
+        [showPaginator]="false"
+        [globalFilterFields]="['clave', 'descripcion', 'valor']"
+        [colSpan]="cols.length + 1"
+        emptyMessageTitle="No hay parámetros configurados"
+        emptyMessageSubtitle="Los parámetros se cargan automáticamente al iniciar el sistema">
+
+        <ng-template #body let-parametro>
+          <tr>
+            <td><code class="font-mono text-sm">{{ parametro.clave }}</code></td>
+            <td><strong>{{ parametro.valor }}</strong></td>
+            <td>
+              <p-tag
+                [value]="parametro.tipo"
+                [severity]="getTipoSeverity(parametro.tipo)">
+              </p-tag>
+            </td>
+            <td class="text-sm text-gray-600">{{ parametro.descripcion }}</td>
+            <td class="text-center">
+              <app-button-add
+                icon="pi pi-pencil"
+                tooltip="Editar valor"
+                size="small"
+                [customStyle]="{'background-color': '#ffc107', 'border-color': '#ffc107'}"
+                (onClick)="editarParametro(parametro)">
+              </app-button-add>
+            </td>
+          </tr>
+        </ng-template>
+      </app-data-table>
+    </app-panel>
+  </div>
+</div>

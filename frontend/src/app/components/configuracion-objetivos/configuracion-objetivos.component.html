@@ -57,25 +57,15 @@
       <!-- Tabla con wrapper -->
       <app-data-table
         [value]="objetivos"
+        [columns]="cols"
+        [showActions]="true"
         [showPaginator]="true"
         [rows]="10"
         [rowsPerPageOptions]="[5, 10, 25, 50]"
         [globalFilterFields]="['nombre', 'descripcion']"
-        [colSpan]="3"
+        [colSpan]="cols.length + 1"
         emptyMessageTitle="No hay objetivos especificos registrados"
         emptyMessageSubtitle="Agregue un nuevo objetivo para comenzar">
-
-        <ng-template #header>
-          <tr>
-            <th pSortableColumn="nombre" style="min-width: 200px">
-              Nombre <p-sortIcon field="nombre"></p-sortIcon>
-            </th>
-            <th pSortableColumn="descripcion" style="min-width: 300px">
-              Descripcion <p-sortIcon field="descripcion"></p-sortIcon>
-            </th>
-            <th style="min-width: 120px; text-align: center">Acciones</th>
-          </tr>
-        </ng-template>
 
         <ng-template #body let-objetivo>
           <tr>

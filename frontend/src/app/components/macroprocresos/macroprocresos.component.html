@@ -19,13 +19,13 @@
                 styleClass="border-l-4 border-indigo-500 shadow-lg">
                 <form (ngSubmit)="guardar()" #formMacroproceso="ngForm" class="space-y-6">
 
-                    <!-- Fila 1: Código y Tipo -->
+                    <!-- Fila 1: Unidad Estratégica y Tipo -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="space-y-2">
                             <label for="unidadEstrategica"
                                 class="block text-sm font-bold text-gray-700 flex items-center">
                                 <i class="pi pi-hashtag mr-2 text-indigo-600"></i>
-                                Código de Macroproceso
+                                Unidad Estratégica (Siglas)
                                 <span class="text-red-500 ml-1">*</span>
                             </label>
                             <app-input-text id="unidadEstrategica" name="unidadEstrategica"
@@ -37,7 +37,7 @@
                         <div class="space-y-2">
                             <label for="tipo" class="block text-sm font-bold text-gray-700 flex items-center">
                                 <i class="pi pi-sitemap mr-2 text-indigo-600"></i>
-                                Unidad Estratégica
+                                Tipo de Macroproceso
                                 <span class="text-red-500 ml-1">*</span>
                             </label>
                             <app-dropdown [options]="tiposOptions" optionLabel="label" optionValue="value"

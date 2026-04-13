@@ -2,7 +2,9 @@ package ec.edu.espe.inventario.service;
 
 import ec.edu.espe.inventario.model.dto.*;
 import ec.edu.espe.inventario.model.entity.Macroproceso;
+import ec.edu.espe.inventario.model.enums.AccionAudit;
 import ec.edu.espe.inventario.model.enums.EstadoDocumentacion;
+import ec.edu.espe.inventario.model.enums.TipoNotificacion;
 import ec.edu.espe.inventario.repository.MacroprocesoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +21,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class MacroprocesoService {
-    
+
+    private static final String USUARIO_ID = "admin-espe-001";
+    private static final String USUARIO_NOMBRE = "Administrador";
+    private static final String MODULO = "MACROPROCESOS";
+
     private final MacroprocesoRepository macroprocesoRepository;
     private final ProcesoService procesoService;
+    private final AuditLogService auditLogService;
+    private final NotificacionService notificacionService;
     
     /**
      * Genera un código único para el macroproceso
@@ -62,7 +70,10 @@ public class MacroprocesoService {
         
         Macroproceso saved = macroprocesoRepository.save(macroproceso);
         log.info("Macroproceso creado con ID: {}", saved.getId());
-        
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.CREAR,
+                MODULO, saved.getId(), "Macroproceso creado: " + saved.getNombre());
+
         return convertirADTO(saved);
     }
     
@@ -113,7 +124,10 @@ public class MacroprocesoService {
         
         Macroproceso updated = macroprocesoRepository.save(macroproceso);
         log.info("Macroproceso actualizado: {}", updated.getId());
-        
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.ACTUALIZAR,
+                MODULO, updated.getId(), "Macroproceso actualizado: " + updated.getNombre());
+
         return convertirADTO(updated);
     }
     
@@ -132,8 +146,12 @@ public class MacroprocesoService {
             throw new RuntimeException("No se puede eliminar el macroproceso porque tiene procesos asociados");
         }
         
+        String nombre = macroproceso.getNombre();
         macroprocesoRepository.delete(macroproceso);
         log.info("Macroproceso eliminado: {}", id);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.ELIMINAR,
+                MODULO, id, "Macroproceso eliminado: " + nombre);
     }
     
     /**
@@ -151,9 +169,17 @@ public class MacroprocesoService {
         macroproceso.setActualizadoPor("admin");
         
         Macroproceso updated = macroprocesoRepository.save(macroproceso);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.CAMBIO_ESTADO,
+                MODULO, updated.getId(), "Estado actualizado a " + nuevoEstado + " en: " + updated.getNombre());
+        notificacionService.crear(TipoNotificacion.SISTEMA,
+                "Estado de macroproceso actualizado",
+                "El macroproceso \"" + updated.getNombre() + "\" cambió a estado: " + nuevoEstado.name(),
+                USUARIO_ID, updated.getId(), MODULO);
+
         return convertirADTO(updated);
     }
-    
+
     /**
      * Convertir entidad a DTO simple
      */

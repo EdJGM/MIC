@@ -6,6 +6,10 @@ import { SubprocesosListComponent } from './components/subprocresos/subprocresos
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { RegistrosComponent } from './components/registros/registros.component';
 import { DocumentosNormativosComponent } from './components/documentos-normativos/documentos-normativos.component';
+import { ConfiguracionUsuariosComponent } from './components/configuracion-usuarios/configuracion-usuarios.component';
+import { ConfiguracionParametrosComponent } from './components/configuracion-parametros/configuracion-parametros.component';
+import { ConfiguracionAuditoriaComponent } from './components/configuracion-auditoria/configuracion-auditoria.component';
+import { NotificacionesComponent } from './components/notificaciones/notificaciones.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -18,4 +22,8 @@ export const routes: Routes = [
     // { path: 'reportes/procesos', component: ReportesProcesosComponent },
     // { path: 'reportes/documentos', component: ReportesDocumentosComponent },
     { path: 'configuracion-objetivos', component: ConfiguracionObjetivosComponent },
+    { path: 'usuarios', component: ConfiguracionUsuariosComponent },
+    { path: 'configuracion-parametros', component: ConfiguracionParametrosComponent },
+    { path: 'configuracion-auditoria', component: ConfiguracionAuditoriaComponent },
+    { path: 'notificaciones', component: NotificacionesComponent },
 ];

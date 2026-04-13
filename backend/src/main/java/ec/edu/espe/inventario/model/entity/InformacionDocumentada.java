@@ -103,6 +103,9 @@ public class InformacionDocumentada {
     @Column(name = "secuencial")
     private Integer secuencial;
 
+    @Column(name = "documento_origen_id")
+    private Long documentoOrigenId;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

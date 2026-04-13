@@ -4,7 +4,9 @@ import ec.edu.espe.inventario.model.dto.SubprocesoRequestDTO;
 import ec.edu.espe.inventario.model.dto.SubprocesoResponseDTO;
 import ec.edu.espe.inventario.model.entity.Proceso;
 import ec.edu.espe.inventario.model.entity.Subproceso;
+import ec.edu.espe.inventario.model.enums.AccionAudit;
 import ec.edu.espe.inventario.model.enums.EstadoDocumentacion;
+import ec.edu.espe.inventario.model.enums.TipoNotificacion;
 import ec.edu.espe.inventario.repository.MacroprocesoRepository;
 import ec.edu.espe.inventario.repository.ProcesoRepository;
 import ec.edu.espe.inventario.repository.SubprocesoRepository;
@@ -24,9 +26,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SubprocesoService {
 
+    private static final String USUARIO_ID = "admin-espe-001";
+    private static final String USUARIO_NOMBRE = "Administrador";
+    private static final String MODULO = "SUBPROCESOS";
+
     private final SubprocesoRepository subprocesoRepository;
     private final ProcesoRepository procesoRepository;
     private final MacroprocesoRepository macroprocesoRepository;
+    private final AuditLogService auditLogService;
+    private final NotificacionService notificacionService;
 
     // -------------------------------------------------------------------------
     // Generación de código
@@ -119,6 +127,9 @@ public class SubprocesoService {
         propagarAvanceHaciaArriba(saved);
 
         log.info("Subproceso SP-N{} creado con ID: {}", nivel, saved.getId());
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.CREAR,
+                MODULO, saved.getId(), "Subproceso SP-N" + nivel + " creado: " + saved.getNombre());
+
         return convertirADTO(saved);
     }
 
@@ -173,7 +184,7 @@ public class SubprocesoService {
     }
 
     /**
-     * Actualizar subproceso
+     * Actualizar subproceso (nombre, descripción, estado y jerarquía)
      */
     @Transactional
     public SubprocesoResponseDTO actualizar(Long id, SubprocesoRequestDTO request) {
@@ -182,16 +193,49 @@ public class SubprocesoService {
         Subproceso subproceso = subprocesoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Subproceso no encontrado con ID: " + id));
 
+        // Actualizar campos de datos
         subproceso.setNombre(request.getNombre());
         subproceso.setDescripcion(request.getDescripcion());
         if (request.getEstadoDocumentacion() != null) {
             subproceso.setEstadoDocumentacion(request.getEstadoDocumentacion());
         }
+
+        // Actualizar proceso padre (Proceso N2) si cambió
+        if (request.getProcesoId() != null
+                && !request.getProcesoId().equals(subproceso.getProceso().getId())) {
+            Proceso proceso = procesoRepository.findById(request.getProcesoId())
+                    .orElseThrow(() -> new RuntimeException("Proceso no encontrado con ID: " + request.getProcesoId()));
+            if (proceso.getNivel() != 2) {
+                throw new RuntimeException("El proceso de un Subproceso N1 debe ser un Proceso N2");
+            }
+            subproceso.setProceso(proceso);
+        }
+
+        // Actualizar nivel y subproceso padre
+        int nivel = request.getNivel() != null ? request.getNivel() : subproceso.getNivel();
+        subproceso.setNivel(nivel);
+        if (nivel == 2) {
+            if (request.getSubprocesoPadreId() == null) {
+                throw new RuntimeException("subprocesoPadreId es obligatorio para Subproceso N2");
+            }
+            Subproceso padre = subprocesoRepository.findById(request.getSubprocesoPadreId())
+                    .orElseThrow(() -> new RuntimeException("Subproceso N1 padre no encontrado con ID: " + request.getSubprocesoPadreId()));
+            if (padre.getNivel() != 1) {
+                throw new RuntimeException("El subproceso padre debe ser de nivel 1");
+            }
+            subproceso.setSubprocesoPadre(padre);
+        } else {
+            subproceso.setSubprocesoPadre(null);
+        }
+
         subproceso.setActualizadoPor("admin");
         subproceso.calcularPorcentajeAvance();
 
         Subproceso updated = subprocesoRepository.save(subproceso);
         propagarAvanceHaciaArriba(updated);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.ACTUALIZAR,
+                MODULO, updated.getId(), "Subproceso actualizado: " + updated.getNombre());
 
         return convertirADTO(updated);
     }
@@ -212,6 +256,8 @@ public class SubprocesoService {
 
         Proceso proceso = subproceso.getProceso();
         Subproceso padre = subproceso.getSubprocesoPadre();
+        String nombre = subproceso.getNombre();
+        int nivel = subproceso.getNivel();
         subprocesoRepository.delete(subproceso);
 
         if (padre != null) {
@@ -223,6 +269,9 @@ public class SubprocesoService {
         }
 
         recalcularCadenaProceso(proceso);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.ELIMINAR,
+                MODULO, id, "Subproceso SP-N" + nivel + " eliminado: " + nombre);
     }
 
     /**
@@ -241,6 +290,13 @@ public class SubprocesoService {
 
         Subproceso updated = subprocesoRepository.save(subproceso);
         propagarAvanceHaciaArriba(updated);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.CAMBIO_ESTADO,
+                MODULO, updated.getId(), "Estado actualizado a " + nuevoEstado + " en: " + updated.getNombre());
+        notificacionService.crear(TipoNotificacion.SISTEMA,
+                "Estado de subproceso actualizado",
+                "El subproceso \"" + updated.getNombre() + "\" cambió a estado: " + nuevoEstado.name(),
+                USUARIO_ID, updated.getId(), MODULO);
 
         return convertirADTO(updated);
     }

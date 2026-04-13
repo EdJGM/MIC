@@ -39,7 +39,7 @@ interface Column {
 }
 
 @Component({
-  selector: 'app-subprocesos-list',
+  selector: 'app-procesos-list',
   standalone: true,
   imports: [
     CommonModule,

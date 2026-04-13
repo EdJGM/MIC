@@ -2,16 +2,20 @@ package ec.edu.espe.inventario.service;
 
 import ec.edu.espe.inventario.model.dto.InformacionDocumentadaRequestDTO;
 import ec.edu.espe.inventario.model.dto.InformacionDocumentadaResponseDTO;
+import ec.edu.espe.inventario.model.dto.NuevaVersionRequestDTO;
 import ec.edu.espe.inventario.model.entity.InformacionDocumentada;
 import ec.edu.espe.inventario.model.entity.Macroproceso;
 import ec.edu.espe.inventario.model.entity.Proceso;
 import ec.edu.espe.inventario.model.entity.Subproceso;
+import ec.edu.espe.inventario.model.enums.AccionAudit;
 import ec.edu.espe.inventario.model.enums.EstadoDocumento;
+import ec.edu.espe.inventario.model.enums.TipoNotificacion;
 import ec.edu.espe.inventario.repository.InformacionDocumentadaRepository;
 import ec.edu.espe.inventario.repository.MacroprocesoRepository;
 import ec.edu.espe.inventario.repository.ProcesoRepository;
 import ec.edu.espe.inventario.repository.SubprocesoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,12 +25,19 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InformacionDocumentadaService {
+
+    private static final String USUARIO_ID = "admin-espe-001";
+    private static final String USUARIO_NOMBRE = "Administrador";
+    private static final String MODULO = "INFORMACION_DOCUMENTADA";
 
     private final InformacionDocumentadaRepository informacionDocumentadaRepository;
     private final MacroprocesoRepository macroprocesoRepository;
     private final ProcesoRepository procesoRepository;
     private final SubprocesoRepository subprocesoRepository;
+    private final AuditLogService auditLogService;
+    private final NotificacionService notificacionService;
 
     @Transactional
     public InformacionDocumentadaResponseDTO crear(InformacionDocumentadaRequestDTO requestDTO) {
@@ -48,6 +59,14 @@ public class InformacionDocumentadaService {
         }
         
         InformacionDocumentada guardado = informacionDocumentadaRepository.save(informacionDocumentada);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.CREAR,
+                MODULO, guardado.getId(), "Documento creado: " + guardado.getNombreDocumento());
+        notificacionService.crear(TipoNotificacion.DOCUMENTO_APROBADO,
+                "Nuevo documento registrado",
+                "Se registró el documento \"" + guardado.getNombreDocumento() + "\" (código: " + guardado.getCodigoDocumento() + ")",
+                USUARIO_ID, guardado.getId(), MODULO);
+
         return mapearEntidadADTO(guardado);
     }
 
@@ -80,8 +99,12 @@ public class InformacionDocumentadaService {
                 .orElseThrow(() -> new RuntimeException("Información documentada no encontrada con id: " + id));
         
         mapearDTOAEntidad(requestDTO, informacionDocumentada);
-        
+
         InformacionDocumentada actualizado = informacionDocumentadaRepository.save(informacionDocumentada);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.ACTUALIZAR,
+                MODULO, actualizado.getId(), "Documento actualizado: " + actualizado.getNombreDocumento());
+
         return mapearEntidadADTO(actualizado);
     }
 
@@ -91,9 +114,109 @@ public class InformacionDocumentadaService {
                 .orElseThrow(() -> new RuntimeException("Información documentada no encontrada con id: " + id));
         
         // Eliminación lógica
-        informacionDocumentada.setEstado(EstadoDocumento.OBSOLETO);
+        String nombreDoc = informacionDocumentada.getNombreDocumento();
+        informacionDocumentada.setEstado(EstadoDocumento.ELIMINADO);
         informacionDocumentada.setFechaEliminacion(LocalDate.now());
         informacionDocumentadaRepository.save(informacionDocumentada);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.ELIMINAR,
+                MODULO, id, "Documento marcado como obsoleto: " + nombreDoc);
+    }
+
+    @Transactional
+    public InformacionDocumentadaResponseDTO nuevaVersion(Long id, NuevaVersionRequestDTO request) {
+        InformacionDocumentada docAnterior = informacionDocumentadaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Documento no encontrado con id: " + id));
+
+        // Marcar versión anterior como OBSOLETO
+        docAnterior.setEstado(EstadoDocumento.INACTIVO);
+        informacionDocumentadaRepository.save(docAnterior);
+
+        // Calcular nuevo número de versión
+        String versionAnterior = docAnterior.getVersion() != null ? docAnterior.getVersion() : "V1";
+        String nuevaVersion = incrementarVersion(versionAnterior);
+
+        // El origen siempre apunta al documento raíz
+        Long origenId = docAnterior.getDocumentoOrigenId() != null
+                ? docAnterior.getDocumentoOrigenId()
+                : docAnterior.getId();
+
+        // Crear nuevo registro copiando datos del anterior
+        InformacionDocumentada nueva = new InformacionDocumentada();
+        nueva.setFechaSolicitud(LocalDate.now());
+        nueva.setUnidad(docAnterior.getUnidad());
+        nueva.setSolicitadoPor(docAnterior.getSolicitadoPor());
+        nueva.setSede(docAnterior.getSede());
+        nueva.setMacroproceso(docAnterior.getMacroproceso());
+        nueva.setProcesoN1(docAnterior.getProcesoN1());
+        nueva.setProcesoN2(docAnterior.getProcesoN2());
+        nueva.setSubprocesoN1(docAnterior.getSubprocesoN1());
+        nueva.setSubprocesoN2(docAnterior.getSubprocesoN2());
+        nueva.setTipoDocumento(docAnterior.getTipoDocumento());
+        nueva.setNombreDocumento(docAnterior.getNombreDocumento());
+        nueva.setFechaProtocolo(docAnterior.getFechaProtocolo());
+        nueva.setLugarEvento(docAnterior.getLugarEvento());
+        nueva.setEnlaceArchivo(request.getEnlaceArchivo());
+        nueva.setMotivo("ACTUALIZACION");
+        nueva.setObservaciones(request.getObservaciones());
+        nueva.setCodigoProceso(docAnterior.getCodigoProceso());
+        nueva.setObservacionesUpdi(docAnterior.getObservacionesUpdi());
+        nueva.setCodificadoPor(docAnterior.getCodificadoPor());
+        nueva.setMes(LocalDate.now().getMonthValue());
+        nueva.setAnio(LocalDate.now().getYear());
+        nueva.setVersion(nuevaVersion);
+        nueva.setSecuencial(docAnterior.getSecuencial());
+        nueva.setDocumentoOrigenId(origenId);
+        nueva.setEstado(EstadoDocumento.ACTIVO);
+
+        // Código: reemplaza la versión en el código anterior
+        String codigoNuevo = generarCodigoNuevaVersion(docAnterior.getCodigoDocumento(), nuevaVersion);
+        nueva.setCodigoDocumento(codigoNuevo);
+
+        InformacionDocumentada guardado = informacionDocumentadaRepository.save(nueva);
+
+        auditLogService.registrar(USUARIO_ID, USUARIO_NOMBRE, AccionAudit.CREAR,
+                MODULO, guardado.getId(),
+                "Nueva versión " + nuevaVersion + " de documento: " + guardado.getNombreDocumento());
+        notificacionService.crear(TipoNotificacion.DOCUMENTO_APROBADO,
+                "Nueva versión de documento publicada",
+                "Se publicó la versión " + nuevaVersion + " del documento \"" + guardado.getNombreDocumento() + "\"",
+                USUARIO_ID, guardado.getId(), MODULO);
+
+        log.info("Nueva versión {} creada para documento ID {}", nuevaVersion, id);
+        return mapearEntidadADTO(guardado);
+    }
+
+    @Transactional(readOnly = true)
+    public List<InformacionDocumentadaResponseDTO> obtenerHistorial(Long id) {
+        InformacionDocumentada doc = informacionDocumentadaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Documento no encontrado con id: " + id));
+        Long origenId = doc.getDocumentoOrigenId() != null ? doc.getDocumentoOrigenId() : doc.getId();
+        return informacionDocumentadaRepository.findHistorialByOrigenId(origenId)
+                .stream()
+                .map(this::mapearEntidadADTO)
+                .collect(Collectors.toList());
+    }
+
+    private String incrementarVersion(String version) {
+        if (version == null || version.isEmpty()) return "V2";
+        try {
+            int num = Integer.parseInt(version.substring(1));
+            return "V" + (num + 1);
+        } catch (Exception e) {
+            return version + "_v2";
+        }
+    }
+
+    private String generarCodigoNuevaVersion(String codigoAnterior, String nuevaVersion) {
+        if (codigoAnterior == null) return null;
+        // Format: UNIDAD-TIPODOC-ANIO-VERSION-SECUENCIAL → replace VERSION part
+        String[] partes = codigoAnterior.split("-");
+        if (partes.length >= 4) {
+            partes[partes.length - 2] = nuevaVersion;
+            return String.join("-", partes);
+        }
+        return codigoAnterior + "-" + nuevaVersion;
     }
 
     private void mapearDTOAEntidad(InformacionDocumentadaRequestDTO dto, InformacionDocumentada entidad) {
@@ -154,6 +277,9 @@ public class InformacionDocumentadaService {
         entidad.setAnio(dto.getAnio());
         entidad.setVersion(dto.getVersion());
         entidad.setSecuencial(dto.getSecuencial());
+        if (dto.getDocumentoOrigenId() != null) {
+            entidad.setDocumentoOrigenId(dto.getDocumentoOrigenId());
+        }
     }
 
     private InformacionDocumentadaResponseDTO mapearEntidadADTO(InformacionDocumentada entidad) {
@@ -206,9 +332,10 @@ public class InformacionDocumentadaService {
         dto.setAnio(entidad.getAnio());
         dto.setVersion(entidad.getVersion());
         dto.setSecuencial(entidad.getSecuencial());
+        dto.setDocumentoOrigenId(entidad.getDocumentoOrigenId());
         dto.setCreatedAt(entidad.getCreatedAt());
         dto.setUpdatedAt(entidad.getUpdatedAt());
-        
+
         return dto;
     }
 

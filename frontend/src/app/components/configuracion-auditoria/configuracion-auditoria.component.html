@@ -1,0 +1,98 @@
+<div class="p-4">
+  <div class="w-full">
+    <app-panel header="Log de Auditoría">
+
+      <!-- Filtros -->
+      <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div class="grid grid-cols-12 gap-4 items-end">
+
+          <div class="col-span-12 md:col-span-3">
+            <label class="block font-medium mb-2 text-sm">Módulo</label>
+            <app-dropdown
+              name="filtroModulo"
+              [(ngModel)]="filtroModulo"
+              [options]="modulosOpciones"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todos los módulos">
+            </app-dropdown>
+          </div>
+
+          <div class="col-span-12 md:col-span-3">
+            <label class="block font-medium mb-2 text-sm">Desde</label>
+            <app-calendar
+              name="filtroDesde"
+              [(ngModel)]="filtroDesde"
+              placeholder="Fecha inicio"
+              [showTime]="false">
+            </app-calendar>
+          </div>
+
+          <div class="col-span-12 md:col-span-3">
+            <label class="block font-medium mb-2 text-sm">Hasta</label>
+            <app-calendar
+              name="filtroHasta"
+              [(ngModel)]="filtroHasta"
+              placeholder="Fecha fin"
+              [showTime]="false">
+            </app-calendar>
+          </div>
+
+          <div class="col-span-12 md:col-span-3 flex gap-2">
+            <app-button-primary
+              label="Filtrar"
+              icon="pi pi-search"
+              (onClick)="cargarLogs()">
+            </app-button-primary>
+            <app-button-secondary
+              label="Limpiar"
+              icon="pi pi-times"
+              (onClick)="limpiarFiltros()">
+            </app-button-secondary>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <app-data-table
+        [value]="logs"
+        [columns]="cols"
+        [showPaginator]="true"
+        [rows]="15"
+        [rowsPerPageOptions]="[10, 15, 25, 50]"
+        [globalFilterFields]="['usuarioNombre', 'modulo', 'descripcion', 'resultado']"
+        [colSpan]="cols.length"
+        emptyMessageTitle="No hay registros de auditoría"
+        emptyMessageSubtitle="Las operaciones del sistema quedarán registradas aquí">
+
+        <ng-template #body let-log>
+          <tr>
+            <td class="text-sm text-gray-600">
+              {{ log.fechaHora | date:'dd/MM/yyyy HH:mm:ss' }}
+            </td>
+            <td>
+              <strong>{{ log.usuarioNombre }}</strong>
+              <div class="text-xs text-gray-500">{{ log.usuarioId }}</div>
+            </td>
+            <td>
+              <p-tag
+                [value]="log.accionDescripcion || log.accion"
+                [severity]="getAccionSeverity(log.accion)">
+              </p-tag>
+            </td>
+            <td><code class="text-xs">{{ log.modulo }}</code></td>
+            <td class="text-sm">{{ log.descripcion }}</td>
+            <td class="text-center">
+              <p-tag
+                [value]="log.resultado"
+                [severity]="getResultadoSeverity(log.resultado)">
+              </p-tag>
+            </td>
+            <td class="text-xs text-gray-500">{{ log.ip || '-' }}</td>
+          </tr>
+        </ng-template>
+      </app-data-table>
+    </app-panel>
+  </div>
+</div>

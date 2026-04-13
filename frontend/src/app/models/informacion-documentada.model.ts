@@ -33,6 +33,8 @@ export interface InformacionDocumentada {
   secuencial?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  documentoOrigenId?: number;
+  cantidadVersiones?: number;
 }
 
 export interface InformacionDocumentadaRequest {
@@ -61,6 +63,7 @@ export interface InformacionDocumentadaRequest {
   anio?: number;
   version?: string;
   secuencial?: number;
+  documentoOrigenId?: number;
 }
 
 export const SEDES = [

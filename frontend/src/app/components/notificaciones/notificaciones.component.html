@@ -1,0 +1,80 @@
+<div class="p-4">
+  <div class="w-full">
+    <app-panel header="Notificaciones">
+      <ng-template #icons>
+        <!-- Badge contador -->
+        <span *ngIf="cantidadNoLeidas > 0"
+          class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-full mr-2">
+          {{ cantidadNoLeidas }} sin leer
+        </span>
+        <app-button-add
+          icon="pi pi-check-square"
+          tooltip="Marcar todas como leídas"
+          [customStyle]="{'background-color': '#1a7b4e', 'border-color': '#1a7b4e'}"
+          (onClick)="marcarTodasLeidas()">
+        </app-button-add>
+      </ng-template>
+
+      <!-- Filtro rápido -->
+      <div class="mb-4 flex items-center gap-3">
+        <app-button-secondary
+          [label]="soloNoLeidas ? 'Ver todas' : 'Solo no leídas'"
+          [icon]="soloNoLeidas ? 'pi pi-list' : 'pi pi-filter'"
+          (onClick)="toggleFiltro()">
+        </app-button-secondary>
+        <span class="text-sm text-gray-500">
+          {{ notificaciones.length }} notificacion{{ notificaciones.length !== 1 ? 'es' : '' }}
+        </span>
+      </div>
+
+      <!-- Tabla -->
+      <app-data-table
+        [value]="notificaciones"
+        [columns]="cols"
+        [showActions]="true"
+        [showPaginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 25, 50]"
+        [globalFilterFields]="['titulo', 'mensaje', 'modulo']"
+        [colSpan]="cols.length + 1"
+        emptyMessageTitle="No hay notificaciones"
+        emptyMessageSubtitle="Las notificaciones del sistema aparecerán aquí">
+
+        <ng-template #body let-notif>
+          <tr [class.bg-blue-50]="!notif.leida" [class.font-medium]="!notif.leida">
+            <td>
+              <p-tag
+                [value]="notif.tipoNombre || notif.tipo"
+                [severity]="getTipoSeverity(notif.tipo)">
+              </p-tag>
+            </td>
+            <td>
+              <span [class.font-bold]="!notif.leida">{{ notif.titulo }}</span>
+              <span *ngIf="!notif.leida"
+                class="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full align-middle">
+              </span>
+            </td>
+            <td class="text-sm text-gray-600">{{ notif.mensaje }}</td>
+            <td><code class="text-xs">{{ notif.modulo || '-' }}</code></td>
+            <td class="text-sm text-gray-600">
+              {{ notif.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+            </td>
+            <td class="text-center">
+              <app-button-add
+                *ngIf="!notif.leida"
+                icon="pi pi-check"
+                tooltip="Marcar como leída"
+                size="small"
+                [customStyle]="{'background-color': '#1a7b4e', 'border-color': '#1a7b4e'}"
+                (onClick)="marcarLeida(notif)">
+              </app-button-add>
+              <span *ngIf="notif.leida" class="text-xs text-gray-400">
+                <i class="pi pi-check-circle text-green-500"></i> Leída
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+      </app-data-table>
+    </app-panel>
+  </div>
+</div>

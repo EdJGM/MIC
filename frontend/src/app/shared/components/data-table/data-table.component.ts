@@ -33,24 +33,27 @@ import { COLORS } from '../../constants/colors.constant';
         (onLazyLoad)="onLazyLoad($event)"
         (onSort)="onSort($event)">
 
-        <!-- Header Template internal to DataTable -->
+        <!-- Header Template: usa el proyectado (#header) o el interno por columnas -->
         <ng-template pTemplate="header" let-columns>
-          <tr>
-            <th *ngFor="let col of columns" [pSortableColumn]="col.field" class="text-center font-bold py-4">
-              <div class="flex items-center justify-center gap-2">
-                <!-- Icon logic based on field could be expanded, dynamic or generic -->
-                {{ col.header }}
-                <p-sortIcon [field]="col.field"></p-sortIcon>
-              </div>
-            </th>
-            <!-- Actions Column -->
-            <th *ngIf="showActions" class="text-center font-bold py-4 min-w-[150px]">
-              <div class="flex items-center justify-center gap-2">
-                <i class="pi pi-cog"></i>
-                {{ actionsLabel }}
-              </div>
-            </th>
-          </tr>
+          <ng-container *ngIf="headerTemplate; else defaultHeader">
+            <ng-container *ngTemplateOutlet="headerTemplate"></ng-container>
+          </ng-container>
+          <ng-template #defaultHeader>
+            <tr>
+              <th *ngFor="let col of columns" [pSortableColumn]="col.field" class="text-center font-bold py-4">
+                <div class="flex items-center justify-center gap-2">
+                  {{ col.header }}
+                  <p-sortIcon [field]="col.field"></p-sortIcon>
+                </div>
+              </th>
+              <th *ngIf="showActions" class="text-center font-bold py-4 min-w-[150px]">
+                <div class="flex items-center justify-center gap-2">
+                  <i class="pi pi-cog"></i>
+                  {{ actionsLabel }}
+                </div>
+              </th>
+            </tr>
+          </ng-template>
         </ng-template>
 
         <!-- Body template projection -->
@@ -205,7 +208,7 @@ export class DataTableComponent implements AfterContentInit, OnChanges {
   @Input() styleClass: string = '';
 
   // Templates proyectados
-  // @ContentChild('header') headerTemplate!: TemplateRef<any>; // Removed as we are using internal header
+  @ContentChild('header') headerTemplate!: TemplateRef<any>;
   @ContentChild('body') bodyTemplate!: TemplateRef<any>;
 
   constructor(private cdr: ChangeDetectorRef) { }

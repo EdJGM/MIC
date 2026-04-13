@@ -48,6 +48,11 @@ export class ConfiguracionObjetivosComponent implements OnInit {
 
   formulario: ObjetivoEspecificoRequest = this.inicializarFormulario();
 
+  cols = [
+    { field: 'nombre', header: 'Nombre' },
+    { field: 'descripcion', header: 'Descripción' }
+  ];
+
   constructor(private objetivoService: ObjetivoEspecificoService) {}
 
   ngOnInit(): void {
