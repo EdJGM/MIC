@@ -40,4 +40,30 @@ public interface InformacionDocumentadaRepository extends JpaRepository<Informac
 
     @Query("SELECT i FROM InformacionDocumentada i WHERE (i.id = :origenId OR i.documentoOrigenId = :origenId) ORDER BY i.createdAt DESC")
     List<InformacionDocumentada> findHistorialByOrigenId(@Param("origenId") Long origenId);
+
+    // RF-24: contar por estado
+    @Query("SELECT COUNT(i) FROM InformacionDocumentada i WHERE CAST(i.estado AS string) = :estado")
+    Long countByEstado(@Param("estado") String estado);
+
+    // RF-25: agrupar por tipo de documento
+    @Query("SELECT i.tipoDocumento, COUNT(i) FROM InformacionDocumentada i GROUP BY i.tipoDocumento ORDER BY COUNT(i) DESC")
+    List<Object[]> countGroupByTipoDocumento();
+
+    // RF-26: agrupar por unidad
+    @Query("SELECT i.unidad, COUNT(i) FROM InformacionDocumentada i GROUP BY i.unidad ORDER BY COUNT(i) DESC")
+    List<Object[]> countGroupByUnidad();
+
+    // RF-27: agrupar por año y mes (Oracle syntax con EXTRACT)
+    @Query(value =
+        "SELECT COALESCE(i.anio, EXTRACT(YEAR FROM i.fecha_solicitud)) AS anio, " +
+        "       COALESCE(i.mes,  EXTRACT(MONTH FROM i.fecha_solicitud)) AS mes, " +
+        "       COUNT(*) AS cantidad " +
+        "FROM informacion_documentada i " +
+        "WHERE COALESCE(i.anio, EXTRACT(YEAR FROM i.fecha_solicitud)) >= :anioDesde " +
+        "  AND COALESCE(i.anio, EXTRACT(YEAR FROM i.fecha_solicitud)) <= :anioHasta " +
+        "GROUP BY COALESCE(i.anio, EXTRACT(YEAR FROM i.fecha_solicitud)), " +
+        "         COALESCE(i.mes,  EXTRACT(MONTH FROM i.fecha_solicitud)) " +
+        "ORDER BY 1 ASC, 2 ASC",
+        nativeQuery = true)
+    List<Object[]> countGroupByAnioMes(@Param("anioDesde") Integer anioDesde, @Param("anioHasta") Integer anioHasta);
 }

@@ -1,0 +1,54 @@
+<div class="space-y-6 p-4">
+  <div class="bg-white rounded-xl p-6 border border-gray-200">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">Reporte de Procesos</h1>
+    <div class="flex flex-wrap items-end gap-4">
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-600">Tipo de reporte</label>
+        <p-dropdown [options]="tiposReporte" [(ngModel)]="tipoReporte" optionLabel="label" optionValue="value" placeholder="Seleccionar tipo"></p-dropdown>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-600">Desde</label>
+        <p-calendar [(ngModel)]="fechaDesde" dateFormat="dd/mm/yy" [showIcon]="true" placeholder="Fecha inicio"></p-calendar>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-600">Hasta</label>
+        <p-calendar [(ngModel)]="fechaHasta" dateFormat="dd/mm/yy" [showIcon]="true" placeholder="Fecha fin"></p-calendar>
+      </div>
+      <button pButton label="Generar Reporte" icon="pi pi-search" class="p-button-primary" [loading]="cargando" (click)="generarReporte()"></button>
+      <button pButton label="XLSX" icon="pi pi-file-excel" class="p-button-success" [disabled]="!generado" (click)="exportarXLSX()"></button>
+      <button pButton label="PDF" icon="pi pi-file-pdf" class="p-button-danger" [disabled]="!generado" (click)="exportarPDF()"></button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMsg" class="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">{{ errorMsg }}</div>
+  <div *ngIf="cargando" class="bg-white rounded-xl p-8 border border-gray-200 text-center text-gray-400">Cargando datos...</div>
+
+  <ng-container *ngIf="generado && !cargando && !errorMsg">
+    <div *ngIf="tipoReporte === 'estado' && datosEstado" class="grid grid-cols-2 gap-4">
+      <div class="bg-blue-50 rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-blue-700">{{ datosEstado.totalProcesos }}</div>
+        <div class="text-sm text-blue-500 mt-1">Total procesos</div>
+      </div>
+      <div class="bg-green-50 rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-green-700">{{ datosEstado.promedioAvance }}%</div>
+        <div class="text-sm text-green-500 mt-1">Avance promedio</div>
+      </div>
+    </div>
+
+    <p-card header="Tabla de resultados">
+      <div *ngIf="filas.length === 0" class="text-center text-gray-400 py-6">No hay datos para el criterio seleccionado.</div>
+      <p-table *ngIf="filas.length > 0" [value]="filas" [paginator]="filas.length > 10" [rows]="10" styleClass="p-datatable-sm p-datatable-gridlines">
+        <ng-template pTemplate="header">
+          <tr><th *ngFor="let col of columnas">{{ col.header }}</th></tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-fila>
+          <tr><td *ngFor="let col of columnas">{{ fila[col.field] }}</td></tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+
+    <p-card header="Gráfica" *ngIf="chartData && filas.length > 0">
+      <p-chart [type]="chartType" [data]="chartData" [options]="chartOptions"></p-chart>
+    </p-card>
+  </ng-container>
+</div>

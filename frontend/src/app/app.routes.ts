@@ -10,6 +10,8 @@ import { ConfiguracionUsuariosComponent } from './components/configuracion-usuar
 import { ConfiguracionParametrosComponent } from './components/configuracion-parametros/configuracion-parametros.component';
 import { ConfiguracionAuditoriaComponent } from './components/configuracion-auditoria/configuracion-auditoria.component';
 import { NotificacionesComponent } from './components/notificaciones/notificaciones.component';
+import { ReportesProcesosComponent } from './components/reportes-procesos/reportes-procesos.component';
+import { ReportesDocumentosComponent } from './components/reportes-documentos/reportes-documentos.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -19,8 +21,8 @@ export const routes: Routes = [
     { path: 'subprocesos', component: SubprocesosListComponent },
     { path: 'registros', component: RegistrosComponent },
     { path: 'documentos', component: DocumentosNormativosComponent },
-    // { path: 'reportes/procesos', component: ReportesProcesosComponent },
-    // { path: 'reportes/documentos', component: ReportesDocumentosComponent },
+    { path: 'reportes/procesos',   component: ReportesProcesosComponent },
+    { path: 'reportes/documentos', component: ReportesDocumentosComponent },
     { path: 'configuracion-objetivos', component: ConfiguracionObjetivosComponent },
     { path: 'usuarios', component: ConfiguracionUsuariosComponent },
     { path: 'configuracion-parametros', component: ConfiguracionParametrosComponent },
